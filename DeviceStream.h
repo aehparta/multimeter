@@ -91,7 +91,7 @@ private:
 	/* connection error handling */
 	static const int reconnectCountMax = 5;
 	static const int waitConfigCountMax = 3;
-	int reconnectCount;
+	int reconnectCount = 0;
 	QTimer reconnectTimer;
 	int waitConfigCount;
 	QTimer waitConfigTimer;

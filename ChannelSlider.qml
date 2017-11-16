@@ -17,7 +17,7 @@ ColumnLayout {
 		anchors.leftMargin: 5
 		anchors.rightMargin: 5
 		value: DeviceJs.valueSliderChanged()
-		maximumValue: 100
+		maximumValue: 255
 		minimumValue: 0
 		stepSize: 1
 

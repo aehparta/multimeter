@@ -48,6 +48,9 @@ void Devices::serviceDiscovered(const QBluetoothServiceInfo &service)
 void Devices::deviceDiscovered(const QBluetoothDeviceInfo &device)
 {
 	qDebug() << "device" << device.address();
+	qDebug() << "uuid" << device.deviceUuid();
+	qDebug() << "classes" << device.serviceClasses();
+	qDebug() << "service uuids" << device.serviceUuids();
 	DeviceStream *stream = new DeviceStream(this);
 	connect(stream, SIGNAL(connected()), this, SLOT(deviceStreamConnected()));
 	connect(stream, SIGNAL(stringDataChanged()), this, SLOT(deviceStreamReceiveData()));

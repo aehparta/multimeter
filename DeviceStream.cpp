@@ -166,7 +166,6 @@ void DeviceStream::stop()
 
 	m_socket->disconnect();
 	m_socket->close();
-	delete m_socket;
 	m_socket = NULL;
 	m_connected = false;
 #endif
@@ -179,6 +178,7 @@ void DeviceStream::connectionReady()
 	setStringData("get:config");
 	waitConfigCount = 1;
 	waitConfigTimer.start(5000);
+	reconnectCount = 0;
 }
 #endif
 
@@ -188,9 +188,8 @@ void DeviceStream::connectionError(QBluetoothSocket::SocketError error)
 void DeviceStream::connectionError()
 #endif
 {
-	qDebug() << "connection error";
+	qDebug() << "connection error" << error;
 	stop();
-	reconnectCount = 1;
 	reconnectTimer.start(5000);
 }
 

@@ -1,41 +1,42 @@
 function onReceiveData(data)
 {
+	var i;
 	if (data.indexOf('config:') === 0)
 	{
 		if (data.indexOf(':channels:') !== -1)
 		{
-			var i = data.indexOf(':channels:') + 10;
+			i = data.indexOf(':channels:') + 10;
 			deviceChannels = data.substr(i);
 		}
 		else if (data.indexOf(':name:') !== -1)
 		{
-			var i = data.indexOf(':name:') + 6;
+			i = data.indexOf(':name:') + 6;
 			itemLabel.text = data.substr(i);
 			item.height = itemIcon.height + itemValue.height;
 		}
 		else if (data.indexOf(':type:') !== -1)
 		{
-			var i = data.indexOf(':type:') + 6;
+			i = data.indexOf(':type:') + 6;
 			deviceType = data.substr(i).trim();
 		}
 		else if (data.indexOf(':mode:') !== -1)
 		{
-			var i = data.indexOf(':mode:') + 6;
+			i = data.indexOf(':mode:') + 6;
 			deviceMode = data.substr(i).trim();
 		}
 		else if (data.indexOf(':zero:') !== -1)
 		{
-			var i = data.indexOf(':zero:') + 6;
+			i = data.indexOf(':zero:') + 6;
 			deviceZero = parseFloat(data.substr(i));
 		}
 		else if (data.indexOf(':divider:') !== -1)
 		{
-			var i = data.indexOf(':divider:') + 9;
+			i = data.indexOf(':divider:') + 9;
 			deviceDivider = parseFloat(data.substr(i));
 		}
 		else if (data.indexOf(':resolution:') !== -1)
 		{
-			var i = data.indexOf(':resolution:') + 12;
+			i = data.indexOf(':resolution:') + 12;
 			deviceResolution = parseFloat(data.substr(i));
 			deviceDecimals = 0;
 			for (var j = deviceResolution; j < 1; j *= 10)
@@ -86,32 +87,32 @@ function valueChanged()
 		decimals++;
 	}
 
-	if (modelData.chType == 'datetime' && modelData.chMode == 'source')
+	if (modelData.chType === 'datetime' && modelData.chMode === 'source')
 	{
 		itemValue.visible = true;
 		return Qt.formatTime(modelData.chValue, 'hh:mm:ss');
 	}
-	else if (modelData.chType == 'voltage')
+	else if (modelData.chType === 'voltage')
 	{
 		itemValue.visible = true;
 		return Number(modelData.chValue).toFixed(decimals) + ' V';
 	}
-	else if (modelData.chType == 'current')
+	else if (modelData.chType === 'current')
 	{
 		itemValue.visible = true;
 		return Number(modelData.chValue).toFixed(decimals) + ' A';
 	}
-	else if (modelData.chType == 'resistance')
+	else if (modelData.chType === 'resistance')
 	{
 		itemValue.visible = true;
 		return modelData.chValue + ' Ω';
 	}
-	else if (modelData.chType == 'frequency')
+	else if (modelData.chType === 'frequency')
 	{
 		itemValue.visible = true;
 		return modelData.chValue + ' Hz';
 	}
-	else if (modelData.chType == 'wattage')
+	else if (modelData.chType === 'wattage')
 	{
 		itemValue.visible = true;
 		return modelData.chValue + ' W';
@@ -139,7 +140,7 @@ function valueRightTopChanged()
 		return '---';
 	}
 
-	if (modelData.chType == 'datetime')
+	if (modelData.chType === 'datetime')
 	{
 		itemValueRightTop.visible = true;
 		return Qt.formatDate(modelData.chValue, 'd.M.yyyy');
@@ -155,13 +156,13 @@ function valueSetRequest()
 
 	var channel = modelData.chThis;
 
-	if (modelData.chMethod != 'push' || modelData.chMode != 'sink')
+	if (modelData.chMethod !== 'push' || modelData.chMode !== 'sink')
 	{
 		if (!modelData.chFirstChild)
 		{
 			return;
 		}
-		if (modelData.chFirstChild.chMethod != 'push' || modelData.chFirstChild.chMode != 'sink')
+		if (modelData.chFirstChild.chMethod !== 'push' || modelData.chFirstChild.chMode !== 'sink')
 		{
 			return;
 		}
@@ -169,7 +170,7 @@ function valueSetRequest()
 		channel = modelData.chFirstChild;
 	}
 
-	if (channel.chType == 'datetime')
+	if (channel.chType === 'datetime')
 	{
 		channel.chValue = new Date();
 	}
