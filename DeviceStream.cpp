@@ -188,8 +188,12 @@ void DeviceStream::connectionError(QBluetoothSocket::SocketError error)
 void DeviceStream::connectionError()
 #endif
 {
-	qDebug() << "connection error" << error;
-	stop();
+#ifndef USE_BLUEZ
+    qDebug() << "connection error" << error;
+#else
+    qDebug() << "connection error";
+#endif
+    stop();
 	reconnectTimer.start(5000);
 }
 
