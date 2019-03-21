@@ -1,0 +1,4 @@
+*.sublime-workspace
+.qmake.stash
+app/build
+app/Makefile
