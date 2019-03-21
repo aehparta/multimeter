@@ -1,7 +1,7 @@
 
 #include "DeviceStream.h"
 
-DeviceStream::DeviceStream(QObject *parent) :
+DeviceStream::DeviceStream(QObject *parent, QString address, quint16 port) :
 	QObject(parent), reconnectTimer(this), waitConfigTimer(this)
 {
 	connect(&reconnectTimer, SIGNAL(timeout()), this, SLOT(reconnectTry()));
@@ -10,79 +10,76 @@ DeviceStream::DeviceStream(QObject *parent) :
 	waitConfigTimer.setSingleShot(true);
 
 	m_connected = false;
-	m_socket = 0;
-	m_address = "invalid";
+	m_address = address;
+	m_port = port;
+	m_socket = NULL;
+	m_btSocket = NULL;
 
 	m_stringDataWrite.clear();
 	m_stringDataRead.clear();
 	m_stringDataReadBuffer.clear();
 }
 
-QString DeviceStream::address() const
-{
-	return m_address;
-}
-
-void DeviceStream::setAddress(const QString &address)
-{
-	if (address != m_address) {
-		m_address = address;
-		emit addressChanged();
-	}
-}
-
-QString DeviceStream::stringData()
-{
-	if (m_stringDataRead.isEmpty()) {
-		return NULL;
-	}
-	return m_stringDataRead.takeFirst();
-}
-
-void DeviceStream::setStringData(const QString &data)
-{
-	if (!m_socket) {
-		return;
-	}
-	QByteArray bdata;
-	bdata.append(data);
-	m_socket->write(bdata);
-	m_socket->write("\n");
-}
-
 int DeviceStream::start()
 {
-	m_socket = new QBluetoothSocket(QBluetoothServiceInfo::RfcommProtocol);
-	connect(m_socket, SIGNAL(error(QBluetoothSocket::SocketError)), this, SLOT(connectionError(QBluetoothSocket::SocketError)));
-	connect(m_socket, SIGNAL(connected()), this, SLOT(connectionReady()));
-	connect(m_socket, SIGNAL(readyRead()), this, SLOT(dataReadReady()));
-	m_socket->connectToService(QBluetoothAddress(m_address), QBluetoothUuid(QStringLiteral("00001101-0000-1000-8000-00805F9B34FB")));
+	if (m_port == 0) {
+		m_btSocket = new QBluetoothSocket(QBluetoothServiceInfo::RfcommProtocol);
+		connect(m_btSocket, SIGNAL(error(QBluetoothSocket::SocketError)), this, SLOT(connectionError(QBluetoothSocket::SocketError)));
+		connect(m_btSocket, SIGNAL(connected()), this, SLOT(connectionReady()));
+		connect(m_btSocket, SIGNAL(readyRead()), this, SLOT(dataReadReady()));
+		m_btSocket->connectToService(QBluetoothAddress(m_address), QBluetoothUuid(QStringLiteral("00001101-0000-1000-8000-00805F9B34FB")));
+	} else {
+		m_socket = new QTcpSocket(this);
+		connect(m_socket, SIGNAL(connected()), this, SLOT(connectionReady()));
+		connect(m_socket, SIGNAL(readyRead()), this, SLOT(dataReadReady()));
+		m_socket->connectToHost(m_address, m_port);
+	}
 
 	return 0;
 }
 
 void DeviceStream::stop()
 {
-	if (!m_socket) {
+	m_connected = false;
+
+	if (!m_btSocket && !m_socket) {
 		return;
 	}
-	qDebug() << "socket disconnect" << m_socket;
 
 	foreach (DeviceChannel *channel, channels) {
 		/* set to reconnecting state */
 		channel->stop();
 	}
 
-	m_socket->disconnect();
-	m_socket->close();
-	m_socket = NULL;
-	m_connected = false;
+	if (m_btSocket) {
+		m_btSocket->disconnect();
+		m_btSocket->close();
+		m_btSocket = NULL;
+	}
+	if (m_socket) {
+		m_socket->disconnect();
+		m_socket->close();
+		m_socket = NULL;
+	}
+}
+
+void DeviceStream::send(const QString &data)
+{
+	QByteArray bdata;
+	bdata.append(data);
+	bdata.append("\n");
+	if (m_btSocket) {
+		m_btSocket->write(bdata);
+	}
+	if (m_socket) {
+		m_socket->write(bdata);
+	}
 }
 
 void DeviceStream::connectionReady()
 {
 	m_connected = true;
-	setStringData("get:config");
+	send("get:config");
 	waitConfigCount = 1;
 	waitConfigTimer.start(5000);
 	reconnectCount = 0;
@@ -90,23 +87,35 @@ void DeviceStream::connectionReady()
 
 void DeviceStream::connectionError(QBluetoothSocket::SocketError error)
 {
-	qDebug() << "connection error" << error;
 	stop();
 	reconnectTimer.start(5000);
 }
 
 void DeviceStream::dataReadReady()
 {
-	while (m_socket->canReadLine()) {
-		QByteArray data = m_socket->readLine();
-		QString sdata;
-		sdata.append(data);
-		sdata = sdata.trimmed();
-		if (sdata.isEmpty()) {
-			break;
+	if (m_btSocket) {
+		while (m_btSocket->canReadLine()) {
+			QByteArray data = m_btSocket->readLine();
+			QString sdata;
+			sdata.append(data);
+			sdata = sdata.trimmed();
+			if (sdata.isEmpty()) {
+				break;
+			}
+			emit received(sdata);
 		}
-		m_stringDataRead.append(sdata);
-		emit stringDataChanged();
+	}
+	if (m_socket) {
+		while (m_socket->canReadLine()) {
+			QByteArray data = m_socket->readLine();
+			QString sdata;
+			sdata.append(data);
+			sdata = sdata.trimmed();
+			if (sdata.isEmpty()) {
+				break;
+			}
+			emit received(sdata);
+		}
 	}
 }
 
@@ -192,7 +201,7 @@ void DeviceStream::reconnectTry()
 		return;
 	}
 
-	qDebug() << "socket" << m_socket << "try to reconnect, times left to try" << (reconnectCountMax - reconnectCount);
+	qDebug() << "socket" << m_btSocket << "try to reconnect, times left to try" << (reconnectCountMax - reconnectCount);
 	stop();
 	start();
 	reconnectCount++;
@@ -206,8 +215,8 @@ void DeviceStream::waitConfigCheck()
 		}
 		waitConfigTimer.stop();
 	} else {
-		qDebug() << "socket" << m_socket << "config not received, try to ask it again, times left to try" << (waitConfigCountMax - waitConfigCount);
-		setStringData("get:config");
+		qDebug() << "socket" << m_btSocket << "config not received, try to ask it again, times left to try" << (waitConfigCountMax - waitConfigCount);
+		send("get:config");
 		waitConfigCount++;
 		waitConfigTimer.start(5000);
 	}

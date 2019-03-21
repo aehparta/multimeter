@@ -97,7 +97,7 @@ void DeviceChannel::chSetValue(const QVariant &value)
 			}
 
 			if (str.length() > 1) {
-				stream->setStringData(str);
+				stream->send(str);
 			}
 		}
 		emit chValueChanged();
@@ -289,7 +289,7 @@ void DeviceChannel::timedValuePull()
 	char channel_name = chIndex + 'A';
 	QString str;
 	str += channel_name;
-	stream->setStringData(str);
+	stream->send(str);
 }
 
 bool DeviceChannel::receiveConfigValue(const QStringList data)

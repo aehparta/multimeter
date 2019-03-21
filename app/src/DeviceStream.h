@@ -11,6 +11,7 @@
 #include <QBluetoothServiceInfo>
 #include <QBluetoothDeviceInfo>
 #include <QDateTime>
+#include <QTcpSocket>
 
 #include "DeviceChannel.h"
 
@@ -19,20 +20,13 @@ class DeviceStream : public QObject
 {
 	Q_OBJECT
 
-	Q_PROPERTY(QString address READ address WRITE setAddress NOTIFY addressChanged)
-	Q_PROPERTY(QString stringData READ stringData WRITE setStringData NOTIFY stringDataChanged)
-
 public:
 	int start();
 	void stop();
 
-	DeviceStream(QObject *parent = NULL);
+	DeviceStream(QObject *parent = NULL, QString address = "", quint16 port = 0);
 
-	QString address() const;
-	void setAddress(const QString &address);
-
-	QString stringData();
-	void setStringData(const QString &data);
+	void send(const QString &data);
 
 	DeviceChannel *getChannel(int id, bool create);
 	QList<QObject *> getChannels();
@@ -47,7 +41,7 @@ signals:
 	void addressChanged();
 	void typeChanged();
 	void labelChanged();
-	void stringDataChanged();
+	void received(QString data);
 
 public slots:
 	void connectionReady();
@@ -63,12 +57,14 @@ private:
 
 	bool m_connected;
 	QString m_address;
+	quint16 m_port;
 
 	QList<QString> m_stringDataWrite;
 	QList<QString> m_stringDataRead;
 	QString m_stringDataReadBuffer;
 
-	QBluetoothSocket *m_socket;
+	QTcpSocket *m_socket;
+	QBluetoothSocket *m_btSocket;
 
 	/* connection error handling */
 	static const int reconnectCountMax = 5;

@@ -12,6 +12,7 @@
 #include <QBluetoothDeviceInfo>
 #include <QBluetoothServiceDiscoveryAgent>
 #include <QBluetoothDeviceDiscoveryAgent>
+#include <QUdpSocket>
 #include <QQmlContext>
 #include <QTimer>
 
@@ -23,6 +24,8 @@ class Devices : public QObject
 {
 	Q_OBJECT
 	Q_PROPERTY(bool scanInProgress READ isScanning NOTIFY scanStateChanged)
+
+	const int BCAST_PORT = 17001;
 
 public:
 	Devices(QObject *parent = NULL);
@@ -36,12 +39,10 @@ signals:
 	void scanStateChanged();
 
 public slots:
-	void deviceDiscovered(const QBluetoothDeviceInfo &);
-	void deviceDiscoveryFinished();
-	void deviceStreamConnected();
-	void deviceStreamReceiveData();
-
-	void testSlot();
+	void scannerBtFoundDevice(const QBluetoothDeviceInfo &);
+	void scannerBtFinished();
+	void deviceStreamReceiveData(QString data);
+	void scannerUdpHasData();
 
 protected:
 
@@ -61,7 +62,8 @@ private:
 
 	void checkNewChannels();
 
-	QBluetoothDeviceDiscoveryAgent *agentBluetooth;
+	QBluetoothDeviceDiscoveryAgent *scannerBt;
+	QUdpSocket *scannerUdp;
 };
 
 

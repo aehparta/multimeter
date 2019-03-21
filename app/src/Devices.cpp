@@ -6,69 +6,86 @@
 Devices::Devices(QObject *parent) :
 	QObject(parent), timer(this)
 {
-	agentBluetooth = NULL;
-
-	// counter = 0;
-	// connect(&timer, SIGNAL(timeout()), this, SLOT(testSlot()));
-	// timer.start(500);
+	scannerBt = NULL;
+	scannerUdp = NULL;
 }
 
 void Devices::scan()
 {
-	if (!agentBluetooth) {
-		agentBluetooth = new QBluetoothDeviceDiscoveryAgent(this);
-		connect(agentBluetooth, SIGNAL(deviceDiscovered(QBluetoothDeviceInfo)),
-		        this, SLOT(deviceDiscovered(QBluetoothDeviceInfo)));
-		connect(agentBluetooth, SIGNAL(finished()), this, SLOT(deviceDiscoveryFinished()));
+	/* create and start bluetooth scanner */
+	if (!scannerBt) {
+		scannerBt = new QBluetoothDeviceDiscoveryAgent(this);
+		connect(scannerBt, SIGNAL(deviceDiscovered(QBluetoothDeviceInfo)),
+		        this, SLOT(scannerBtFoundDevice(QBluetoothDeviceInfo)));
+		connect(scannerBt, SIGNAL(finished()), this, SLOT(scannerBtFinished()));
+	}
+	if (!scannerBt->isActive()) {
+		scannerBt->start();
 	}
 
-	if (!agentBluetooth->isActive()) {
-		agentBluetooth->start();
-		emit scanStarted();
-		emit scanStateChanged();
+	/* create and start udp scanner */
+	if (!scannerUdp) {
+		scannerUdp = new QUdpSocket(this);
+		scannerUdp->bind(BCAST_PORT, QUdpSocket::ShareAddress);
+		connect(scannerUdp, SIGNAL(readyRead()), this, SLOT(scannerUdpHasData()));
 	}
+	scannerUdp->writeDatagram("scan", 4, QHostAddress::Broadcast, BCAST_PORT);
+
+	emit scanStarted();
+	emit scanStateChanged();
 }
 
 bool Devices::isScanning() const
 {
-	if (!agentBluetooth) {
-		return false;
+	bool bt = false, udp = false;
+	if (scannerBt) {
+		bt = scannerBt->isActive();
 	}
-	return agentBluetooth->isActive();
+	if (scannerUdp) {
+		udp = true;
+	}
+	return bt || udp;
 }
 
-void Devices::deviceDiscovered(const QBluetoothDeviceInfo &device)
+void Devices::scannerBtFoundDevice(const QBluetoothDeviceInfo &device)
 {
-	qDebug() << "device" << device.address();
-	qDebug() << "uuid" << device.deviceUuid();
-	qDebug() << "classes" << device.serviceClasses();
-	qDebug() << "service uuids" << device.serviceUuids();
-	DeviceStream *stream = new DeviceStream(this);
-	connect(stream, SIGNAL(connected()), this, SLOT(deviceStreamConnected()));
-	connect(stream, SIGNAL(stringDataChanged()), this, SLOT(deviceStreamReceiveData()));
-	stream->setAddress(device.address().toString());
+	DeviceStream *stream = new DeviceStream(this, device.address().toString());
+	connect(stream, SIGNAL(received(QString)), this, SLOT(deviceStreamReceiveData(QString)));
 	stream->start();
 	streams.append(stream);
+
+	qDebug() << "found bluetooth device at address" << device.address();
 }
 
-void Devices::deviceDiscoveryFinished()
+void Devices::scannerBtFinished()
 {
-	qDebug() << "device discovery finished";
 	emit scanFinished();
 	emit scanStateChanged();
 }
 
-void Devices::deviceStreamConnected()
+void Devices::scannerUdpHasData()
 {
-	DeviceStream *stream = (DeviceStream *)sender();
-	qDebug() << "device stream connected, address" << stream->address() << ", request configuration";
+	QByteArray data;
+	while (scannerUdp->hasPendingDatagrams()) {
+		QHostAddress address;
+		data.resize(int(scannerUdp->pendingDatagramSize()));
+		scannerUdp->readDatagram(data.data(), data.size(), &address);
+		if (data.startsWith("tcp:")) {
+			quint16 port = data.mid(4).toInt();
+
+			DeviceStream *stream = new DeviceStream(this, address.toString(), port);
+			connect(stream, SIGNAL(received(QString)), this, SLOT(deviceStreamReceiveData(QString)));
+			stream->start();
+			streams.append(stream);
+
+			qDebug() << "found tcp device at " << address.toString() << port;
+		}
+	}
 }
 
-void Devices::deviceStreamReceiveData()
+void Devices::deviceStreamReceiveData(QString data)
 {
 	DeviceStream *stream = (DeviceStream *)sender();
-	QString data = stream->stringData();
-
 	if (data.startsWith("config:")) {
 		qDebug() << data;
 		parseConfigLine(stream, data);
@@ -126,40 +143,4 @@ void Devices::checkNewChannels()
 void Devices::setRootContext(QQmlContext *ctxt)
 {
 	rootContext = ctxt;
-	//testSlot();
 }
-
-void Devices::testSlot()
-{
-	DeviceChannel *channel;
-	return;
-
-	if (counter > 0) {
-		channel = (DeviceChannel *)streams.at(0)->getChannel(0, false);
-		channel->chSetValue(QDateTime::currentDateTime());
-	} else {
-		DeviceStream *stream = new DeviceStream(this);
-
-		channel = stream->getChannel(0, true);
-		channel->chSetName(QString("channel 0"), true);
-		channel->chSetType("datetime");
-
-		channel = stream->getChannel(1, true);
-		channel->chSetName(QString("channel 1"), true);
-		channel->chSetValue(rand() % 100);
-		channel->chSetType("slider");
-		channel->chSetParentChannel("A");
-
-		channel = stream->getChannel(10, true);
-		channel->chSetName(QString("channel 10"), true);
-		channel->chSetValue(0);
-		channel->chSetType("switch");
-
-		streams.append(stream);
-
-		checkNewChannels();
-	}
-
-	counter++;
-}
-
