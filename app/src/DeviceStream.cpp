@@ -1,19 +1,6 @@
 
 #include "DeviceStream.h"
 
-#ifdef USE_BLUEZ
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <errno.h>
-#include <string.h>
-#include <sys/socket.h>
-#include <bluetooth/bluetooth.h>
-#include <bluetooth/hci.h>
-#include <bluetooth/hci_lib.h>
-#include <bluetooth/rfcomm.h>
-#endif
-
 DeviceStream::DeviceStream(QObject *parent) :
 	QObject(parent), reconnectTimer(this), waitConfigTimer(this)
 {
@@ -54,13 +41,6 @@ QString DeviceStream::stringData()
 
 void DeviceStream::setStringData(const QString &data)
 {
-#ifdef USE_BLUEZ
-	if (m_socket < 1) {
-		return;
-	}
-	m_stringDataWrite.append(data);
-	m_notifierWrite->setEnabled(true);
-#else
 	if (!m_socket) {
 		return;
 	}
@@ -68,83 +48,21 @@ void DeviceStream::setStringData(const QString &data)
 	bdata.append(data);
 	m_socket->write(bdata);
 	m_socket->write("\n");
-#endif
 }
 
 int DeviceStream::start()
 {
-#ifdef USE_BLUEZ
-	struct sockaddr_rc addr;
-	int s, status;
-	QByteArray device_address;
-
-	/* allocate a socket */
-	s = socket(AF_BLUETOOTH, SOCK_STREAM | SOCK_NONBLOCK, BTPROTO_RFCOMM);
-
-	/* set the connection parameters */
-	memset(&addr, 0, sizeof(addr));
-	addr.rc_family = AF_BLUETOOTH;
-	addr.rc_channel = (uint8_t)1;
-	device_address.append(m_address);
-	str2ba(device_address.data(), &addr.rc_bdaddr);
-
-	/* connect to device */
-	status = ::connect(s, (struct sockaddr *)&addr, sizeof(addr));
-
-	/* check status */
-	if (status != 0 && status != EINPROGRESS && status != -1) {
-		qDebug() << "socket error: " << strerror(status);
-		return -1;
-	}
-
-	m_socket = s;
-	m_notifierWrite = new QSocketNotifier(m_socket, QSocketNotifier::Write, this);
-	m_notifierRead = new QSocketNotifier(m_socket, QSocketNotifier::Read, this);
-	m_notifierException = new QSocketNotifier(m_socket, QSocketNotifier::Exception, this);
-	connect(m_notifierWrite, SIGNAL(activated(int)), this, SLOT(dataWriteReady()));
-	connect(m_notifierRead, SIGNAL(activated(int)), this, SLOT(dataReadReady()));
-	connect(m_notifierException, SIGNAL(activated(int)), this, SLOT(connectionError()));
-	m_notifierWrite->setEnabled(true);
-	m_notifierRead->setEnabled(true);
-	m_notifierException->setEnabled(true);
-	qDebug() << "socket created" << m_socket;
-#else
 	m_socket = new QBluetoothSocket(QBluetoothServiceInfo::RfcommProtocol);
 	connect(m_socket, SIGNAL(error(QBluetoothSocket::SocketError)), this, SLOT(connectionError(QBluetoothSocket::SocketError)));
 	connect(m_socket, SIGNAL(connected()), this, SLOT(connectionReady()));
 	connect(m_socket, SIGNAL(readyRead()), this, SLOT(dataReadReady()));
 	m_socket->connectToService(QBluetoothAddress(m_address), QBluetoothUuid(QStringLiteral("00001101-0000-1000-8000-00805F9B34FB")));
-#endif
 
 	return 0;
 }
 
 void DeviceStream::stop()
 {
-#ifdef USE_BLUEZ
-	if (m_socket < 1) {
-		return;
-	}
-	qDebug() << "socket disconnect" << m_socket;
-
-	foreach (DeviceChannel *channel, channels) {
-		/* set to reconnecting state */
-		channel->stop();
-	}
-
-	m_notifierWrite->disconnect();
-	m_notifierRead->disconnect();
-	m_notifierException->disconnect();
-	delete m_notifierWrite;
-	delete m_notifierRead;
-	delete m_notifierException;
-	::close(m_socket);
-	m_notifierWrite = NULL;
-	m_notifierRead = NULL;
-	m_notifierException = NULL;
-	m_socket = -1;
-	m_connected = false;
-#else
 	if (!m_socket) {
 		return;
 	}
@@ -159,10 +77,8 @@ void DeviceStream::stop()
 	m_socket->close();
 	m_socket = NULL;
 	m_connected = false;
-#endif
 }
 
-#ifndef USE_BLUEZ
 void DeviceStream::connectionReady()
 {
 	m_connected = true;
@@ -171,79 +87,16 @@ void DeviceStream::connectionReady()
 	waitConfigTimer.start(5000);
 	reconnectCount = 0;
 }
-#endif
 
-#ifndef USE_BLUEZ
 void DeviceStream::connectionError(QBluetoothSocket::SocketError error)
-#else
-void DeviceStream::connectionError()
-#endif
 {
-#ifndef USE_BLUEZ
 	qDebug() << "connection error" << error;
-#else
-	qDebug() << "connection error";
-#endif
 	stop();
 	reconnectTimer.start(5000);
 }
 
-void DeviceStream::dataWriteReady()
-{
-#ifdef USE_BLUEZ
-	if (!m_connected) {
-		qDebug() << "connection up";
-		m_connected = true;
-		setStringData("get:config");
-		waitConfigCount = 1;
-		waitConfigTimer.start(5000);
-	}
-
-	if (!m_stringDataWrite.isEmpty()) {
-		QByteArray data;
-		data.append(m_stringDataWrite.takeFirst());
-		if (::write(m_socket, data.data(), data.size()) < 0) {
-			qDebug() << "write failed";
-			/* @todo handle error */
-		}
-		if (::write(m_socket, "\n", 1) != 1) {
-			/* same here */
-		}
-	}
-
-	if (m_stringDataWrite.isEmpty()) {
-		m_notifierWrite->setEnabled(false);
-	}
-#endif
-}
-
 void DeviceStream::dataReadReady()
 {
-#ifdef USE_BLUEZ
-	char c;
-	while (1) {
-		int r = ::read(m_socket, &c, 1);
-		if (r == -1) {
-			/* no data to read */
-			return;
-		} else if (r != 1) {
-			/* error, disconnected etc */
-			qDebug() << "error" << strerror(r);
-			return;
-		}
-		if (c == '\n') {
-			if (m_stringDataReadBuffer.isEmpty()) {
-				continue;
-			}
-			// qDebug() << m_stringDataReadBuffer;
-			m_stringDataRead.append(m_stringDataReadBuffer);
-			m_stringDataReadBuffer.clear();
-			emit stringDataChanged();
-			return;
-		}
-		m_stringDataReadBuffer.append(c);
-	}
-#else
 	while (m_socket->canReadLine()) {
 		QByteArray data = m_socket->readLine();
 		QString sdata;
@@ -255,7 +108,6 @@ void DeviceStream::dataReadReady()
 		m_stringDataRead.append(sdata);
 		emit stringDataChanged();
 	}
-#endif
 }
 
 DeviceChannel *DeviceStream::getChannel(int id, bool create)

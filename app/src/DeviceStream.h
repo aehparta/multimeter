@@ -1,6 +1,6 @@
 
-#ifndef __DEVICE_STREAM_H__
-#define __DEVICE_STREAM_H__
+#ifndef _DEVICE_STREAM_H_
+#define _DEVICE_STREAM_H_
 
 #include <QDebug>
 #include <QObject>
@@ -50,21 +50,10 @@ signals:
 	void stringDataChanged();
 
 public slots:
-#ifndef USE_BLUEZ
 	void connectionReady();
-#endif
-
-#ifndef USE_BLUEZ
 	void connectionError(QBluetoothSocket::SocketError);
-#else
-	void connectionError();
-#endif
-
-	void dataWriteReady();
 	void dataReadReady();
-
 	void reconnectTry();
-
 	void waitConfigCheck();
 
 protected:
@@ -79,14 +68,7 @@ private:
 	QList<QString> m_stringDataRead;
 	QString m_stringDataReadBuffer;
 
-#ifndef USE_BLUEZ
 	QBluetoothSocket *m_socket;
-#else
-	int m_socket;
-	QSocketNotifier *m_notifierWrite;
-	QSocketNotifier *m_notifierRead;
-	QSocketNotifier *m_notifierException;
-#endif
 
 	/* connection error handling */
 	static const int reconnectCountMax = 5;

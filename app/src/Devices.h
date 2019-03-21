@@ -1,6 +1,6 @@
 
-#ifndef __DEVICES_H__
-#define __DEVICES_H__
+#ifndef _DEVICES_H_
+#define _DEVICES_H_
 
 #include <QDebug>
 #include <QObject>
@@ -36,7 +36,6 @@ signals:
 	void scanStateChanged();
 
 public slots:
-	void serviceDiscovered(const QBluetoothServiceInfo &);
 	void deviceDiscovered(const QBluetoothDeviceInfo &);
 	void deviceDiscoveryFinished();
 	void deviceStreamConnected();
@@ -62,8 +61,7 @@ private:
 
 	void checkNewChannels();
 
-	QBluetoothDeviceDiscoveryAgent *deviceAgent;
-	QBluetoothServiceDiscoveryAgent *serviceAgent;
+	QBluetoothDeviceDiscoveryAgent *agentBluetooth;
 };
 
 

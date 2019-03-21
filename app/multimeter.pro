@@ -4,21 +4,20 @@ TEMPLATE = app
 QT += core qml quick widgets bluetooth
 
 linux:!android {
-	LIBS += -lbluetooth
-	#DEFINES += USE_BLUEZ
 }
 
 android {
 	DEFINES += USE_ANDROID
 }
 
-SOURCES += main.cpp \
-	Devices.cpp \
-	DeviceStream.cpp \
-	DeviceChannel.cpp \
-	DeviceGroup.cpp
+SOURCES += \
+    src/main.cpp \
+    src/Devices.cpp \
+    src/DeviceStream.cpp \
+    src/DeviceChannel.cpp \
+    src/DeviceGroup.cpp
 
-HEADERS += Devices.h DeviceStream.h DeviceChannel.h DeviceGroup.h
+HEADERS += src/Devices.h src/DeviceStream.h src/DeviceChannel.h src/DeviceGroup.h
 
 RESOURCES += multimeter.qrc
 

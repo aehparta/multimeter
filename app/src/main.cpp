@@ -29,11 +29,14 @@ int main(int argc, char *argv[])
 
 	QQmlContext *ctxt = app_engine.rootContext();
 
+	QList<QObject *> empty;
+	ctxt->setContextProperty("channelsModel", QVariant::fromValue(empty));
+
 	Devices devices;
 	devices.setRootContext(ctxt);
 	ctxt->setContextProperty("devicesObject", &devices);
 
-	app_engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
+	app_engine.load(QUrl(QStringLiteral("qrc:/views/main.qml")));
 
 	return app.exec();
 }

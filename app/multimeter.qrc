@@ -1,14 +1,13 @@
 <RCC>
     <qresource prefix="/">
-        <file>main.qml</file>
-        <file>Style.qml</file>
-        <file>DeviceView.qml</file>
-        <file>ChannelValue.qml</file>
-        <file>ChannelSlider.qml</file>
-        <file>qmldir</file>
+        <file>views/main.qml</file>
+        <file>views/Style.qml</file>
+        <file>views/DeviceView.qml</file>
+        <file>views/ChannelValue.qml</file>
+        <file>views/ChannelSlider.qml</file>
+        <file>views/qmldir</file>
         <file>icons/voltage.png</file>
         <file>icons/current.png</file>
-        <file>device.js</file>
         <file>icons/datetime.png</file>
         <file>icons/frequency.png</file>
         <file>icons/resistance.png</file>
@@ -16,5 +15,6 @@
         <file>icons/switch.png</file>
         <file>icons/switch-on.png</file>
         <file>icons/slider.png</file>
+        <file>js/device.js</file>
     </qresource>
 </RCC>

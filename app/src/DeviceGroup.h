@@ -1,6 +1,6 @@
 
-#ifndef __DEVICE_GROUP_H__
-#define __DEVICE_GROUP_H__
+#ifndef _DEVICE_GROUP_H_
+#define _DEVICE_GROUP_H_
 
 #include <QDebug>
 #include <QObject>

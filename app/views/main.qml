@@ -4,7 +4,7 @@ import QtQuick.Dialogs 1.2
 import QtBluetooth 5.2
 import QtQuick.Controls.Styles 1.4
 import QtQuick.Layouts 1.0
-import "device.js" as DeviceJs
+import "/js/device.js" as DeviceJs
 import "."
 
 

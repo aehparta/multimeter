@@ -6,7 +6,7 @@
 Devices::Devices(QObject *parent) :
 	QObject(parent), timer(this)
 {
-	deviceAgent = NULL;
+	agentBluetooth = NULL;
 
 	// counter = 0;
 	// connect(&timer, SIGNAL(timeout()), this, SLOT(testSlot()));
@@ -15,15 +15,15 @@ Devices::Devices(QObject *parent) :
 
 void Devices::scan()
 {
-	if (!deviceAgent) {
-		deviceAgent = new QBluetoothDeviceDiscoveryAgent(this);
-		connect(deviceAgent, SIGNAL(deviceDiscovered(QBluetoothDeviceInfo)),
+	if (!agentBluetooth) {
+		agentBluetooth = new QBluetoothDeviceDiscoveryAgent(this);
+		connect(agentBluetooth, SIGNAL(deviceDiscovered(QBluetoothDeviceInfo)),
 		        this, SLOT(deviceDiscovered(QBluetoothDeviceInfo)));
-		connect(deviceAgent, SIGNAL(finished()), this, SLOT(deviceDiscoveryFinished()));
+		connect(agentBluetooth, SIGNAL(finished()), this, SLOT(deviceDiscoveryFinished()));
 	}
 
-	if (!deviceAgent->isActive()) {
-		deviceAgent->start();
+	if (!agentBluetooth->isActive()) {
+		agentBluetooth->start();
 		emit scanStarted();
 		emit scanStateChanged();
 	}
@@ -31,15 +31,10 @@ void Devices::scan()
 
 bool Devices::isScanning() const
 {
-	if (!deviceAgent) {
+	if (!agentBluetooth) {
 		return false;
 	}
-	return deviceAgent->isActive();
-}
-
-void Devices::serviceDiscovered(const QBluetoothServiceInfo &service)
-{
-
+	return agentBluetooth->isActive();
 }
 
 void Devices::deviceDiscovered(const QBluetoothDeviceInfo &device)

@@ -1,6 +1,6 @@
 
-#ifndef __DEVICE_CHANNEL_H__
-#define __DEVICE_CHANNEL_H__
+#ifndef _DEVICE_CHANNEL_H_
+#define _DEVICE_CHANNEL_H_
 
 #include <QDebug>
 #include <QObject>
@@ -147,13 +147,5 @@ private:
 
 	QTimer timer;
 };
-
-// "config:channel:A:static:name:Ihmevekotin"
-// "config:channel:A:type:datetime"
-// "config:channel:A:mode:source"
-// "config:channel:A:method:pull"
-// "config:channel:B:static:name:Ihmevekotin-sink"
-// "config:channel:B:type:datetime"
-// "config:channel:B:mode:sink"
 
 #endif

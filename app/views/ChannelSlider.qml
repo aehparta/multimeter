@@ -4,7 +4,7 @@ import QtQuick.Controls.Styles 1.4
 import QtQuick.Controls.Styles 1.4
 import QtGraphicalEffects 1.0
 import QtQuick.Layouts 1.0
-import "device.js" as DeviceJs
+import "/js/device.js" as DeviceJs
 import "."
 
 ColumnLayout {
