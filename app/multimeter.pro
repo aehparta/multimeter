@@ -5,7 +5,7 @@ QT += core qml quick widgets bluetooth
 
 linux:!android {
 	LIBS += -lbluetooth
-	DEFINES += USE_BLUEZ
+	#DEFINES += USE_BLUEZ
 }
 
 android {

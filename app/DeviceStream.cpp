@@ -38,8 +38,7 @@ QString DeviceStream::address() const
 
 void DeviceStream::setAddress(const QString &address)
 {
-	if (address != m_address)
-	{
+	if (address != m_address) {
 		m_address = address;
 		emit addressChanged();
 	}
@@ -47,8 +46,7 @@ void DeviceStream::setAddress(const QString &address)
 
 QString DeviceStream::stringData()
 {
-	if (m_stringDataRead.isEmpty())
-	{
+	if (m_stringDataRead.isEmpty()) {
 		return NULL;
 	}
 	return m_stringDataRead.takeFirst();
@@ -57,15 +55,13 @@ QString DeviceStream::stringData()
 void DeviceStream::setStringData(const QString &data)
 {
 #ifdef USE_BLUEZ
-	if (m_socket < 1)
-	{
+	if (m_socket < 1) {
 		return;
 	}
 	m_stringDataWrite.append(data);
 	m_notifierWrite->setEnabled(true);
 #else
-	if (!m_socket)
-	{
+	if (!m_socket) {
 		return;
 	}
 	QByteArray bdata;
@@ -96,8 +92,7 @@ int DeviceStream::start()
 	status = ::connect(s, (struct sockaddr *)&addr, sizeof(addr));
 
 	/* check status */
-	if (status != 0 && status != EINPROGRESS && status != -1)
-	{
+	if (status != 0 && status != EINPROGRESS && status != -1) {
 		qDebug() << "socket error: " << strerror(status);
 		return -1;
 	}
@@ -127,14 +122,12 @@ int DeviceStream::start()
 void DeviceStream::stop()
 {
 #ifdef USE_BLUEZ
-	if (m_socket < 1)
-	{
+	if (m_socket < 1) {
 		return;
 	}
 	qDebug() << "socket disconnect" << m_socket;
 
-	foreach (DeviceChannel *channel, channels)
-	{
+	foreach (DeviceChannel *channel, channels) {
 		/* set to reconnecting state */
 		channel->stop();
 	}
@@ -152,14 +145,12 @@ void DeviceStream::stop()
 	m_socket = -1;
 	m_connected = false;
 #else
-	if (!m_socket)
-	{
+	if (!m_socket) {
 		return;
 	}
 	qDebug() << "socket disconnect" << m_socket;
 
-	foreach (DeviceChannel *channel, channels)
-	{
+	foreach (DeviceChannel *channel, channels) {
 		/* set to reconnecting state */
 		channel->stop();
 	}
@@ -189,19 +180,18 @@ void DeviceStream::connectionError()
 #endif
 {
 #ifndef USE_BLUEZ
-    qDebug() << "connection error" << error;
+	qDebug() << "connection error" << error;
 #else
-    qDebug() << "connection error";
+	qDebug() << "connection error";
 #endif
-    stop();
+	stop();
 	reconnectTimer.start(5000);
 }
 
 void DeviceStream::dataWriteReady()
 {
 #ifdef USE_BLUEZ
-	if (!m_connected)
-	{
+	if (!m_connected) {
 		qDebug() << "connection up";
 		m_connected = true;
 		setStringData("get:config");
@@ -209,23 +199,19 @@ void DeviceStream::dataWriteReady()
 		waitConfigTimer.start(5000);
 	}
 
-	if (!m_stringDataWrite.isEmpty())
-	{
+	if (!m_stringDataWrite.isEmpty()) {
 		QByteArray data;
 		data.append(m_stringDataWrite.takeFirst());
-		if (::write(m_socket, data.data(), data.size()) < 0)
-		{
+		if (::write(m_socket, data.data(), data.size()) < 0) {
 			qDebug() << "write failed";
 			/* @todo handle error */
 		}
-		if (::write(m_socket, "\n", 1) != 1)
-		{
+		if (::write(m_socket, "\n", 1) != 1) {
 			/* same here */
 		}
 	}
 
-	if (m_stringDataWrite.isEmpty())
-	{
+	if (m_stringDataWrite.isEmpty()) {
 		m_notifierWrite->setEnabled(false);
 	}
 #endif
@@ -235,24 +221,18 @@ void DeviceStream::dataReadReady()
 {
 #ifdef USE_BLUEZ
 	char c;
-	while (1)
-	{
+	while (1) {
 		int r = ::read(m_socket, &c, 1);
-		if (r == -1)
-		{
+		if (r == -1) {
 			/* no data to read */
 			return;
-		}
-		else if (r != 1)
-		{
+		} else if (r != 1) {
 			/* error, disconnected etc */
 			qDebug() << "error" << strerror(r);
 			return;
 		}
-		if (c == '\n')
-		{
-			if (m_stringDataReadBuffer.isEmpty())
-			{
+		if (c == '\n') {
+			if (m_stringDataReadBuffer.isEmpty()) {
 				continue;
 			}
 			// qDebug() << m_stringDataReadBuffer;
@@ -264,14 +244,12 @@ void DeviceStream::dataReadReady()
 		m_stringDataReadBuffer.append(c);
 	}
 #else
-	while (m_socket->canReadLine())
-	{
+	while (m_socket->canReadLine()) {
 		QByteArray data = m_socket->readLine();
 		QString sdata;
 		sdata.append(data);
 		sdata = sdata.trimmed();
-		if (sdata.isEmpty())
-		{
+		if (sdata.isEmpty()) {
 			break;
 		}
 		m_stringDataRead.append(sdata);
@@ -282,16 +260,13 @@ void DeviceStream::dataReadReady()
 
 DeviceChannel *DeviceStream::getChannel(int id, bool create)
 {
-	foreach (DeviceChannel *channel, channels)
-	{
-		if (channel->chGetIndex() == id)
-		{
+	foreach (DeviceChannel *channel, channels) {
+		if (channel->chGetIndex() == id) {
 			return channel;
 		}
 	}
 
-	if (!create)
-	{
+	if (!create) {
 		return NULL;
 	}
 
@@ -305,14 +280,11 @@ QList<QObject *> DeviceStream::getChannels()
 {
 	QList<QObject *> chs;
 
-	foreach (DeviceChannel *channel, channels)
-	{
-		if (channel->chHasValidParentChannel())
-		{
+	foreach (DeviceChannel *channel, channels) {
+		if (channel->chHasValidParentChannel()) {
 			continue;
 		}
-		if (channel->isConnected())
-		{
+		if (channel->isConnected()) {
 			chs.append(channel);
 		}
 	}
@@ -324,14 +296,11 @@ QList<DeviceChannel *> DeviceStream::getChannelsByParent(int parent)
 {
 	QList<DeviceChannel *> chs;
 
-	foreach (DeviceChannel *channel, channels)
-	{
-		if (!channel->isConnected())
-		{
+	foreach (DeviceChannel *channel, channels) {
+		if (!channel->isConnected()) {
 			continue;
 		}
-		if (channel->chGetParentChannel() == parent)
-		{
+		if (channel->chGetParentChannel() == parent) {
 			chs.append(channel);
 		}
 	}
@@ -341,27 +310,22 @@ QList<DeviceChannel *> DeviceStream::getChannelsByParent(int parent)
 
 bool DeviceStream::receiveData(QString data)
 {
-	if (data.length() < 2)
-	{
+	if (data.length() < 2) {
 		return false;
 	}
 
 	int channel_number = (int)data.at(0).toLatin1() - (int)'A';
 	DeviceChannel *channel = NULL;
-	foreach (DeviceChannel *c, channels)
-	{
-		if (!c->isConnected())
-		{
+	foreach (DeviceChannel *c, channels) {
+		if (!c->isConnected()) {
 			continue;
 		}
-		if (c->chGetIndex() == channel_number)
-		{
+		if (c->chGetIndex() == channel_number) {
 			channel = c;
 			break;
 		}
 	}
-	if (!channel)
-	{
+	if (!channel) {
 		return false;
 	}
 
@@ -371,8 +335,7 @@ bool DeviceStream::receiveData(QString data)
 
 void DeviceStream::reconnectTry()
 {
-	if (reconnectCount >= reconnectCountMax)
-	{
+	if (reconnectCount >= reconnectCountMax) {
 		qDebug() << "max reconnects reached (" << reconnectCountMax << ")";
 		return;
 	}
@@ -385,16 +348,12 @@ void DeviceStream::reconnectTry()
 
 void DeviceStream::waitConfigCheck()
 {
-	if (channels.count() > 0 || waitConfigCount >= waitConfigCountMax)
-	{
-		if (waitConfigCount >= waitConfigCountMax)
-		{
+	if (channels.count() > 0 || waitConfigCount >= waitConfigCountMax) {
+		if (waitConfigCount >= waitConfigCountMax) {
 			qDebug() << "max config requests send (" << waitConfigCountMax << ") and connection not up";
 		}
 		waitConfigTimer.stop();
-	}
-	else
-	{
+	} else {
 		qDebug() << "socket" << m_socket << "config not received, try to ask it again, times left to try" << (waitConfigCountMax - waitConfigCount);
 		setStringData("get:config");
 		waitConfigCount++;
