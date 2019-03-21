@@ -16,28 +16,42 @@
 
 
 #define MULTIMETER_TEST_CONFIG \
-		"config:channel:C:static:name:RGB\n" \
-		"config:channel:C:type:switch\n" \
-		"config:channel:C:mode:sink\n" \
-		"config:channel:C:method:push\n" \
-		"config:channel:R:static:name:Slider Red\n" \
-		"config:channel:R:type:slider\n" \
-		"config:channel:R:mode:sink\n" \
-		"config:channel:R:method:push\n" \
-		"config:channel:R:color:000000:ff0000\n" \
-		"config:channel:R:parent:C\n" \
-		"config:channel:G:static:name:Slider Green\n" \
-		"config:channel:G:type:slider\n" \
-		"config:channel:G:mode:sink\n" \
-		"config:channel:G:method:push\n" \
-		"config:channel:G:color:000000:00ff00\n" \
-		"config:channel:G:parent:C\n" \
-		"config:channel:B:static:name:Slider Blue\n" \
+		"config:channel:A:static:name:RGB\n" \
+		"config:channel:A:type:switch\n" \
+		"config:channel:A:mode:sink\n" \
+		"config:channel:A:method:push\n" \
+		"config:channel:B:static:name:Slider Red\n" \
 		"config:channel:B:type:slider\n" \
 		"config:channel:B:mode:sink\n" \
 		"config:channel:B:method:push\n" \
-		"config:channel:B:color:000000:0000ff\n" \
-		"config:channel:B:parent:C\n" \
+		"config:channel:B:color:000000:ff0000\n" \
+		"config:channel:B:parent:A\n" \
+		"config:channel:C:static:name:Slider Green\n" \
+		"config:channel:C:type:slider\n" \
+		"config:channel:C:mode:sink\n" \
+		"config:channel:C:method:push\n" \
+		"config:channel:C:color:000000:00ff00\n" \
+		"config:channel:C:parent:A\n" \
+		"config:channel:D:static:name:Slider Blue\n" \
+		"config:channel:D:type:slider\n" \
+		"config:channel:D:mode:sink\n" \
+		"config:channel:D:method:push\n" \
+		"config:channel:D:color:000000:0000ff\n" \
+		"config:channel:D:parent:A\n" \
+		"config:channel:E:static:name:Voltage\n" \
+		"config:channel:E:type:voltage\n" \
+		"config:channel:E:divider:1000\n" \
+		"config:channel:E:resolution:0.001\n" \
+		"config:channel:F:static:name:Current\n" \
+		"config:channel:F:type:current\n" \
+		"config:channel:F:divider:1000\n" \
+		"config:channel:F:resolution:0.001\n" \
+		"config:channel:G:static:name:Wattage\n" \
+		"config:channel:G:type:wattage\n" \
+		"config:channel:G:divider:1000\n" \
+		"config:channel:G:resolution:0.001\n" \
+		"config:channel:H:static:name:Resistance\n" \
+		"config:channel:H:type:resistance\n" \
 		"C0\n"  \
 		"D0\n" \
 		"E0\n" \
@@ -50,6 +64,12 @@ static int tcp_fd = -1;
 static int udp_fd = -1;
 static fd_set r_fds, w_fds;
 static int max_fd = -1;
+
+static float U = 3.3;
+static float I = 0.150;
+
+
+int last_client = -1;
 
 
 int p_init(void)
@@ -183,16 +203,17 @@ int p_recv(int fd)
 		/* check action */
 		if (strncmp("get:config", line, n) == 0) {
 			dprintf(fd, "%s", MULTIMETER_TEST_CONFIG);
+			last_client = fd;
 		} else if (strncmp("quit", line, n) == 0) {
 			close(fd);
 			FD_CLR(fd, &r_fds);
-		} else if (line[0] == 'C' && n > 1) {
+		} else if (line[0] == 'A' && n > 1) {
 			printf("Switch is now %s\n", line[1] == '0' ? "off" :  "on");
-		} else if (line[0] == 'R' && n > 1) {
-			printf("Red slider to %ld\n", strtol(line + 1, NULL, 16));
-		} else if (line[0] == 'G' && n > 1) {
-			printf("Green slider to %ld\n", strtol(line + 1, NULL, 16));
 		} else if (line[0] == 'B' && n > 1) {
+			printf("Red slider to %ld\n", strtol(line + 1, NULL, 16));
+		} else if (line[0] == 'C' && n > 1) {
+			printf("Green slider to %ld\n", strtol(line + 1, NULL, 16));
+		} else if (line[0] == 'D' && n > 1) {
 			printf("Blue slider to %ld\n", strtol(line + 1, NULL, 16));
 		}
 	}
@@ -210,14 +231,25 @@ void p_run(void)
 		fd_set w = w_fds;
 
 		/* break out of select about every 1 seconds if nothing has happened */
-		tv.tv_sec = 1;
-		tv.tv_usec = 0;
+		tv.tv_sec = 0;
+		tv.tv_usec = 333000;
 
 		err = select(max_fd + 1, &r, &w, NULL, &tv);
 		if (err < 0) {
 			fprintf(stderr, "select() failed, reason: %s", strerror(errno));
 			break;
 		} else if (err == 0) {
+			U += ((float)(rand() % 100) - 50.0) / 10000.0;
+			I += ((float)(rand() % 100) - 50.0) / 10000.0;
+			if (last_client > 0) {
+				dprintf(last_client, "E%04x\nF%04x\nG%04x\nH%04x\n",
+				        (unsigned int)(U * 1000.0),
+				        (unsigned int)(I * 1000.0),
+				        (unsigned int)(U * I * 1000.0),
+				        (unsigned int)(U / I)
+				       );
+
+			}
 			/* nothing happened, just timeout, continue */
 			continue;
 		}

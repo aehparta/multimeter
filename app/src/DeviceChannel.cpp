@@ -377,6 +377,8 @@ bool DeviceChannel::receiveData(QString data)
 	/* adjust to zero */
 	value -= chZero;
 
+	qDebug() << "channel value" << value;
+
 	/* if shannel is sink, then no averaging etc is done */
 	if (chMode == "sink") {
 		chSetValue(QVariant::fromValue(value / chDivider));
@@ -391,7 +393,7 @@ bool DeviceChannel::receiveData(QString data)
 	}
 
 	samples.append(value);
-	if (samples.count() < 800) {
+	if (samples.count() < 1) {
 		return false;
 	}
 

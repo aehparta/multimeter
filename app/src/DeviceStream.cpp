@@ -187,6 +187,7 @@ bool DeviceStream::receiveData(QString data)
 		}
 	}
 	if (!channel) {
+		qDebug() << "channel not found for data" << data;
 		return false;
 	}
 

@@ -1,4 +1,5 @@
 function onReceiveData(data) {
+	console.log(data);
 	var i;
 	if (data.indexOf('config:') === 0) {
 		if (data.indexOf(':channels:') !== -1) {
@@ -75,13 +76,13 @@ function valueChanged() {
 		return Number(modelData.chValue).toFixed(decimals) + ' A';
 	} else if (modelData.chType === 'resistance') {
 		itemValue.visible = true;
-		return modelData.chValue + ' Ω';
+		return Number(modelData.chValue).toFixed(decimals) + ' Ω';
 	} else if (modelData.chType === 'frequency') {
 		itemValue.visible = true;
-		return modelData.chValue + ' Hz';
+		return Number(modelData.chValue).toFixed(decimals) + ' Hz';
 	} else if (modelData.chType === 'wattage') {
 		itemValue.visible = true;
-		return modelData.chValue + ' W';
+		return Number(modelData.chValue).toFixed(decimals) + ' W';
 	}
 
 	return '';
