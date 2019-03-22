@@ -13,14 +13,18 @@ Devices::Devices(QObject *parent) :
 void Devices::scan()
 {
 	/* create and start bluetooth scanner */
-	if (!scannerBt) {
-		scannerBt = new QBluetoothDeviceDiscoveryAgent(this);
-		connect(scannerBt, SIGNAL(deviceDiscovered(QBluetoothDeviceInfo)),
-		        this, SLOT(scannerBtFoundDevice(QBluetoothDeviceInfo)));
-		connect(scannerBt, SIGNAL(finished()), this, SLOT(scannerBtFinished()));
-	}
-	if (!scannerBt->isActive()) {
-		scannerBt->start();
+	if (0) {
+		if (!scannerBt) {
+			scannerBt = new QBluetoothDeviceDiscoveryAgent(this);
+			connect(scannerBt, SIGNAL(deviceDiscovered(QBluetoothDeviceInfo)),
+			        this, SLOT(scannerBtFoundDevice(QBluetoothDeviceInfo)));
+			connect(scannerBt, SIGNAL(finished()), this, SLOT(scannerBtFinished()));
+		}
+		if (!scannerBt->isActive()) {
+			scannerBt->start();
+		}
+	} else {
+		qDebug() << "no bluetooth adapters found, skip bluetooth";
 	}
 
 	/* create and start udp scanner */

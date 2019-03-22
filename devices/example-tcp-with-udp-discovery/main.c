@@ -241,6 +241,8 @@ void p_run(void)
 		} else if (err == 0) {
 			U += ((float)(rand() % 100) - 50.0) / 10000.0;
 			I += ((float)(rand() % 100) - 50.0) / 10000.0;
+			U = U < 0.0 ? 0.0 : U;
+			I = I < 0.0 ? 0.0 : I;
 			if (last_client > 0) {
 				dprintf(last_client, "E%04x\nF%04x\nG%04x\nH%04x\n",
 				        (unsigned int)(U * 1000.0),
@@ -250,6 +252,7 @@ void p_run(void)
 				       );
 
 			}
+			printf("U: %.3f, I: %.3f\n", U, I);
 			/* nothing happened, just timeout, continue */
 			continue;
 		}

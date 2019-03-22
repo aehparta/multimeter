@@ -1,5 +1,5 @@
 
-TARGET = example-network
+TARGET = example-tcp
 SRC = main.c
 
 OBJ = $(SRC:.c=.o) $(ASRC:.S=.o) 

@@ -12,6 +12,7 @@
 #include <QBluetoothDeviceInfo>
 #include <QBluetoothServiceDiscoveryAgent>
 #include <QBluetoothDeviceDiscoveryAgent>
+#include <QBluetoothLocalDevice>
 #include <QUdpSocket>
 #include <QQmlContext>
 #include <QTimer>
