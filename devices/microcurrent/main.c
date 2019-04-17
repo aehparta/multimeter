@@ -20,10 +20,15 @@ int main(int argc, char *argv[])
 	/* base init */
 	os_init();
 	log_init(NULL, 0);
-	nvm_init(NULL, 0);
 	/* wifi base init */
-#ifdef USE_WIFI
+#ifdef TARGET_ESP32
+	nvm_init(NULL, 0);
 	ERROR_IF_R(wifi_init(), 1, "wifi initialization failed");
+#endif
+
+#if defined(TARGET_LINUX) && !defined(USE_I2C_BITBANG)
+	ERROR_IF_R(argc < 2, 1, "give i2c device as first argument");
+	context = argv[1];
 #endif
 
 	/* open i2c */
@@ -45,9 +50,6 @@ int main(int argc, char *argv[])
 			ERROR_MSG("failed reading mcp3221-a5");
 		}
 
-		if (!wifi_connected()) {
-			INFO_MSG("wifi not connected");
-		}
 		INFO_MSG("A2: %.3fV (%04d), A5: %.3fV (%04d)", (float)v1 * vref / 4096.0, (int)v1, (float)v2 * vref / 4096.0, (int)v2);
 		os_sleepf(0.2);
 	}
@@ -56,7 +58,7 @@ int main(int argc, char *argv[])
 	mcp3221_close(&dev1);
 	mcp3221_close(&dev2);
 	i2c_master_close(&i2c);
-#ifdef USE_WIFI
+#ifdef TARGET_ESP32
 	wifi_quit();
 #endif
 	nvm_quit();

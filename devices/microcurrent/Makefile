@@ -4,7 +4,7 @@ ifeq ($(LIBE_PATH),)
     $(error LIBE_PATH not set)
 endif
 
-libe_USE += WIFI I2C I2C_BITBANG LOG
+libe_USE += WIFI I2C LOG
 
 # init
 include $(LIBE_PATH)/init.mk
