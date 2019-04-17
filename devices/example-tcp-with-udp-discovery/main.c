@@ -6,7 +6,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <ctype.h>
+// #include <ctype.h>
 #include <errno.h>
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -14,6 +14,19 @@
 #include <netinet/in.h>
 #include <netdb.h>
 
+#ifdef TARGET_ESP32
+#include <freertos/FreeRTOS.h>
+#include <freertos/task.h>
+#include <freertos/event_groups.h>
+#include <esp_system.h>
+#include <esp_wifi.h>
+#include <esp_wps.h>
+#include <esp_event_loop.h>
+#include <esp_log.h>
+#define WIFI_MAXIMUM_RETRY      10
+#define WIFI_CONNECTED_BIT      BIT0
+int wifi_init(void);
+#endif
 
 #define MULTIMETER_TEST_CONFIG \
 		"config:channel:A:static:name:RGB\n" \
@@ -68,14 +81,18 @@ static int max_fd = -1;
 static float U = 3.3;
 static float I = 0.150;
 
-
-int last_client = -1;
+static int last_client = -1;
 
 
 int p_init(void)
 {
 	int opt;
 	struct sockaddr_in addr;
+
+#ifdef TARGET_ESP32
+	/* initialize networking = wifi when using esp32 */
+	wifi_init();
+#endif
 
 	/* setup for select */
 	FD_ZERO(&r_fds);
@@ -197,7 +214,7 @@ int p_recv(int fd)
 		FD_CLR(fd, &r_fds);
 	} else {
 		/* we got some data from a client, first trim spaces from end */
-		for (char *p = line + n - 1; p >= line && isspace(*p); p--) {
+		for (char *p = line + n - 1; p >= line && (*p == ' ' || *p == '\r' || *p == '\n'); p--) {
 			*p = '\0';
 		}
 		/* check action */
@@ -269,7 +286,11 @@ void p_run(void)
 	}
 }
 
+#ifdef TARGET_ESP32
+int app_main(int argc, char*argv[])
+#else
 int main(int argc, char*argv[])
+#endif
 {
 	if (p_init()) {
 		return EXIT_FAILURE;
@@ -282,4 +303,91 @@ int main(int argc, char*argv[])
 	p_quit(EXIT_SUCCESS);
 	return EXIT_SUCCESS;
 }
+
+
+/* esp32 wifi with wps */
+#ifdef TARGET_ESP32
+
+static EventGroupHandle_t wifi_event_group;
+static esp_wps_config_t wifi_wps_config = WPS_CONFIG_INIT_DEFAULT(WPS_TYPE_PBC);
+#define ERROR_IF_R(condition, ret, msg) do { if (condition) { ESP_LOGE("wifi", "%s", msg); return ret; } } while(0)
+
+static esp_err_t wifi_event_handler(void *ctx, system_event_t *event)
+{
+	static int wifi_retries = 0;
+
+	switch (event->event_id) {
+	case SYSTEM_EVENT_STA_START:
+		if (esp_wifi_connect()) {
+			ERROR_IF_R(esp_wifi_wps_enable(&wifi_wps_config), ESP_FAIL, "wifi wps enable failed");
+			ERROR_IF_R(esp_wifi_wps_start(0), ESP_FAIL, "wifi wps start failed");
+			ESP_LOGI("wifi", "wifi wps setup started");
+		} else {
+			ESP_LOGI("wifi", "wifi is connecting");
+		}
+		break;
+	case SYSTEM_EVENT_STA_GOT_IP:
+		ESP_LOGI("wifi", "wifi got ip: %s", ip4addr_ntoa(&event->event_info.got_ip.ip_info.ip));
+		ERROR_IF_R(esp_wifi_wps_disable(), ESP_FAIL, "wifi wps disable failed");
+		wifi_retries = 0;
+		xEventGroupSetBits(wifi_event_group, WIFI_CONNECTED_BIT);
+		break;
+	case SYSTEM_EVENT_STA_DISCONNECTED:
+		if (wifi_retries < WIFI_MAXIMUM_RETRY) {
+			esp_wifi_connect();
+			xEventGroupClearBits(wifi_event_group, WIFI_CONNECTED_BIT);
+			wifi_retries++;
+			ESP_LOGW("wifi", "wifi retry connect to the AP");
+		} else {
+			ERROR_IF_R(esp_wifi_wps_disable(), ESP_FAIL, "wifi wps disable after disconnect failed");
+			ERROR_IF_R(esp_wifi_wps_enable(&wifi_wps_config), ESP_FAIL, "wifi wps enable after disconnect failed");
+			ERROR_IF_R(esp_wifi_wps_start(0), ESP_FAIL, "wifi wps start after disconnect failed");
+			wifi_retries = 0;
+		}
+		ESP_LOGW("wifi", "wifi connect to the AP fail");
+		break;
+	case SYSTEM_EVENT_STA_WPS_ER_SUCCESS:
+		/*point: the function esp_wifi_wps_start() only get ssid & password
+		 * so call the function esp_wifi_connect() here
+		 * */
+		ESP_LOGI("wifi", "SYSTEM_EVENT_STA_WPS_ER_SUCCESS");
+		ERROR_IF_R(esp_wifi_wps_disable(), ESP_FAIL, "wifi wps disable failed");
+		ERROR_IF_R(esp_wifi_connect(), ESP_FAIL, "wifi connect after wps setup failed");
+		break;
+	case SYSTEM_EVENT_STA_WPS_ER_FAILED:
+		ESP_LOGI("wifi", "SYSTEM_EVENT_STA_WPS_ER_FAILED");
+		ERROR_IF_R(esp_wifi_wps_disable(), ESP_FAIL, "wifi wps disable after failed wps attempt failed");
+		ERROR_IF_R(esp_wifi_wps_enable(&wifi_wps_config), ESP_FAIL, "wifi wps enable after failed wps attempt failed");
+		ERROR_IF_R(esp_wifi_wps_start(0), ESP_FAIL, "wifi wps start after failed wps attempt failed");
+		break;
+	case SYSTEM_EVENT_STA_WPS_ER_TIMEOUT:
+		ESP_LOGI("wifi", "SYSTEM_EVENT_STA_WPS_ER_TIMEOUT");
+		ERROR_IF_R(esp_wifi_wps_disable(), ESP_FAIL, "wifi wps disable after wps timeout failed");
+		ERROR_IF_R(esp_wifi_wps_enable(&wifi_wps_config), ESP_FAIL, "wifi wps enable after wps timeout failed");
+		ERROR_IF_R(esp_wifi_wps_start(0), ESP_FAIL, "wifi wps start after wps timeout failed");
+		break;
+	default:
+		break;
+	}
+
+	return ESP_OK;
+}
+
+int wifi_init(void)
+{
+	wifi_event_group = xEventGroupCreate();
+
+	tcpip_adapter_init();
+	ERROR_IF_R(esp_event_loop_init(wifi_event_handler, NULL), -1, "wifi event loop setup failed");
+
+	wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
+	ERROR_IF_R(esp_wifi_init(&cfg), -1, "wifi config has errors");
+
+	ERROR_IF_R(esp_wifi_set_mode(WIFI_MODE_STA), -1, "unable to set wifi mode to WIFI_MODE_STA");
+	ERROR_IF_R(esp_wifi_start(), -1, "unable to start wifi");
+
+	return 0;
+}
+
+#endif
 
