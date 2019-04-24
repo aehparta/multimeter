@@ -143,7 +143,7 @@ private:
 
 	QStringList chColors;
 
-	QList<qint64> samples;
+	QList<double> samples;
 
 	QTimer timer;
 };

@@ -65,10 +65,29 @@ int wifi_init(void);
 		"config:channel:G:resolution:0.001\n" \
 		"config:channel:H:static:name:Resistance\n" \
 		"config:channel:H:type:resistance\n" \
-		"C0\n"  \
-		"D0\n" \
+		"config:channel:H:format:decimal\n" \
+		"config:channel:H:resolution:0.1\n" \
+		"config:channel:I:static:name:Temperature\n" \
+		"config:channel:I:type:temperature\n" \
+		"config:channel:I:format:decimal\n" \
+		"config:channel:I:resolution:0.1\n" \
+		"config:channel:J:static:name:Humidity\n" \
+		"config:channel:J:type:humidity\n" \
+		"config:channel:J:format:decimal\n" \
+		"config:channel:J:resolution:0.1\n" \
+		"config:channel:K:static:name:Frequency (10kS)\n" \
+		"config:channel:K:type:frequency\n" \
+		"A1\n" \
+		"B25\n" \
+		"C50\n"  \
+		"D75\n" \
 		"E0\n" \
-		"F0\n"
+		"F0\n" \
+		"G0\n" \
+		"H0\n" \
+		"I22.1\n" \
+		"J65.2\n" \
+		"K0\n"
 
 #define MULTIMETER_TCP_PORT     11111
 #define MULTIMETER_UDP_PORT     17001
@@ -78,8 +97,8 @@ static int udp_fd = -1;
 static fd_set r_fds, w_fds;
 static int max_fd = -1;
 
-static float U = 3.3;
-static float I = 0.150;
+static double U = 3.3;
+static double I = 0.150;
 
 static int last_client = -1;
 
@@ -256,16 +275,16 @@ void p_run(void)
 			fprintf(stderr, "select() failed, reason: %s", strerror(errno));
 			break;
 		} else if (err == 0) {
-			U += ((float)(rand() % 100) - 50.0) / 10000.0;
-			I += ((float)(rand() % 100) - 50.0) / 10000.0;
+			U += ((double)(rand() % 100) - 50.0) / 10000.0;
+			I += ((double)(rand() % 100) - 50.0) / 10000.0;
 			U = U < 0.0 ? 0.0 : U;
 			I = I < 0.0 ? 0.0 : I;
 			if (last_client > 0) {
-				dprintf(last_client, "E%04x\nF%04x\nG%04x\nH%04x\n",
+				dprintf(last_client, "E%04x\nF%04x\nG%04x\nH%lf\n",
 				        (unsigned int)(U * 1000.0),
 				        (unsigned int)(I * 1000.0),
 				        (unsigned int)(U * I * 1000.0),
-				        (unsigned int)(U / I)
+				        U / I
 				       );
 
 			}

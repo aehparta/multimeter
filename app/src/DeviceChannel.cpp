@@ -242,13 +242,11 @@ void DeviceChannel::chSetParentChannel(const QString data)
 	int channel_id = (int)data.at(0).toLatin1() - (int)'A';
 
 	if (chParentChannel >= 0) {
-		qDebug() << "parent channel already set";
 		return;
 	}
 
 	DeviceChannel *channel = stream->getChannel(channel_id, false);
 	if (!channel) {
-		qDebug() << "invalid parent channel" << channel_id;
 		return;
 	}
 
@@ -326,6 +324,9 @@ bool DeviceChannel::receiveConfigValue(const QStringList data)
 	} else if (data[3] == "zero") {
 		chSetZero(data[4].toDouble());
 		return true;
+	} else if (data[3] == "format") {
+		chSetFormat(data[4]);
+		return true;
 	} else if (data[3] == "parent") {
 		chSetParentChannel(data[4]);
 		return true;
@@ -356,28 +357,31 @@ bool DeviceChannel::receiveData(QString data)
 		return true;
 	}
 
-	/* sample base */
-	int base = 10;
-	if (chFormat == "hex") {
-		base = 16;
-	} else if (chFormat == "octal") {
-		base = 8;
-	} else if (chFormat == "binary") {
-		base = 2;
-	}
-
-	/* parse value */
+	/* parse value based on format */
 	bool ok = false;
-	qint64 value = data.toLongLong(&ok, base);
+	double value;
+	if (chFormat == "decimal") {
+		/* parse float */
+		value = data.toDouble(&ok);
+	} else {
+		/* parse integer value by base */
+		int base = 10;
+		if (chFormat == "hex") {
+			base = 16;
+		} else if (chFormat == "octal") {
+			base = 8;
+		} else if (chFormat == "binary") {
+			base = 2;
+		}
+		value = (double)data.toLongLong(&ok, base);
+	}
 	if (!ok) {
-		qDebug() << "invalid sample data (base:" << base << "):" << data;
+		qDebug() << "invalid sample data (format:" << chFormat << "):" << data;
 		return false;
 	}
 
 	/* adjust to zero */
 	value -= chZero;
-
-	qDebug() << "channel value" << value;
 
 	/* if shannel is sink, then no averaging etc is done */
 	if (chMode == "sink") {
@@ -398,12 +402,12 @@ bool DeviceChannel::receiveData(QString data)
 	}
 
 	/* add up all the samples */
-	qint64 sum = 0;
+	double sum = 0;
 	for (int i = 0; i < samples.count(); i++) {
 		sum += samples[i];
 	}
 
-	double result = sqrt(sum / samples.count()) / chDivider;
+	double result = sqrt(sum / (double)samples.count()) / chDivider;
 	chSetValue(QVariant::fromValue(result));
 
 	samples.clear();
