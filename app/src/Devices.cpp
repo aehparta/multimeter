@@ -13,7 +13,7 @@ Devices::Devices(QObject *parent) :
 void Devices::scan()
 {
 	/* create and start bluetooth scanner */
-	if (0) {
+	if (1) {
 		if (!scannerBt) {
 			scannerBt = new QBluetoothDeviceDiscoveryAgent(this);
 			connect(scannerBt, SIGNAL(deviceDiscovered(QBluetoothDeviceInfo)),
