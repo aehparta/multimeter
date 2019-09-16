@@ -7,8 +7,9 @@ import QtQuick.Layouts 1.0
 import "/js/device.js" as DeviceJs
 import "."
 
-ColumnLayout {
-	RowLayout {
+Column {
+	Row {
+		id: itemValueTop
 		anchors.right: parent.right
 		anchors.left: parent.left
 
@@ -18,8 +19,8 @@ ColumnLayout {
 			anchors.left: parent.left
 			anchors.leftMargin: 10
 			text: DeviceJs.valueLeftTopChanged()
-			font.pointSize: 28
-			color: Style.valueSideColor
+            font: Style.value.font2
+			color: Style.value.color2
 		}
 
 		Text {
@@ -28,8 +29,8 @@ ColumnLayout {
 			anchors.right: parent.right
 			anchors.rightMargin: 10
 			text: DeviceJs.valueRightTopChanged()
-			font.pointSize: 28
-			color: Style.valueSideColor
+			font: Style.value.font2
+			color: Style.value.color2
 		}
 	}
 
@@ -39,8 +40,8 @@ ColumnLayout {
 		anchors.right: parent.right
 		anchors.rightMargin: 10
 		text: DeviceJs.valueChanged()
-		font.pointSize: 76
-		color: Style.valueMainColor
+		font: Style.value.font1
+		color: Style.value.color1
 		MouseArea {
 			anchors.fill: parent
 			onClicked: DeviceJs.valueSetRequest()

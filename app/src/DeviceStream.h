@@ -21,10 +21,13 @@ class DeviceStream : public QObject
 	Q_OBJECT
 
 public:
+	DeviceStream(QObject *parent = NULL, QString address = "", int port = -1);
+
+	QString getAddress();
+	int getPort();
+
 	int start();
 	void stop();
-
-	DeviceStream(QObject *parent = NULL, QString address = "", quint16 port = 0);
 
 	void send(const QString &data);
 
@@ -57,7 +60,7 @@ private:
 
 	bool m_connected;
 	QString m_address;
-	quint16 m_port;
+	int m_port;
 
 	QList<QString> m_stringDataWrite;
 	QList<QString> m_stringDataRead;

@@ -1,46 +1,46 @@
 
 function valueChanged() {
-	if (modelData.chValue === undefined) {
+	if (modelData.value === undefined) {
 		/* connection error */
 		return '---';
 	}
 
 	var decimals = 0;
-	for (var j = modelData.chResolution; j < 1; j *= 10) {
+	for (var j = modelData.resolution; j < 1; j *= 10) {
 		decimals++;
 	}
 
-	if (modelData.chType === 'datetime' && modelData.chMode === 'source') {
+	if (modelData.type === 'datetime' && modelData.mode === 'source') {
 		itemValue.visible = true;
-		return Qt.formatTime(modelData.chValue, 'hh:mm:ss');
-	} else if (modelData.chType === 'voltage') {
+		return Qt.formatTime(modelData.value, 'hh:mm:ss');
+	} else if (modelData.type === 'voltage') {
 		itemValue.visible = true;
-		return Number(modelData.chValue).toFixed(decimals) + ' V';
-	} else if (modelData.chType === 'current') {
+		return Number(modelData.value).toFixed(decimals) + ' V';
+	} else if (modelData.type === 'current') {
 		itemValue.visible = true;
-		return Number(modelData.chValue).toFixed(decimals) + ' A';
-	} else if (modelData.chType === 'resistance') {
+		return Number(modelData.value).toFixed(decimals) + ' A';
+	} else if (modelData.type === 'resistance') {
 		itemValue.visible = true;
-		return Number(modelData.chValue).toFixed(decimals) + ' Ω';
-	} else if (modelData.chType === 'frequency') {
+		return Number(modelData.value).toFixed(decimals) + ' Ω';
+	} else if (modelData.type === 'frequency') {
 		itemValue.visible = true;
-		return Number(modelData.chValue).toFixed(decimals) + ' Hz';
-	} else if (modelData.chType === 'wattage') {
+		return Number(modelData.value).toFixed(decimals) + ' Hz';
+	} else if (modelData.type === 'wattage') {
 		itemValue.visible = true;
-		return Number(modelData.chValue).toFixed(decimals) + ' W';
-	} else if (modelData.chType === 'temperature') {
+		return Number(modelData.value).toFixed(decimals) + ' W';
+	} else if (modelData.type === 'temperature') {
 		itemValue.visible = true;
-		return Number(modelData.chValue).toFixed(decimals) + ' °C';
-	} else if (modelData.chType === 'humidity') {
+		return Number(modelData.value).toFixed(decimals) + ' °C';
+	} else if (modelData.type === 'humidity') {
 		itemValue.visible = true;
-		return Number(modelData.chValue).toFixed(decimals) + ' %';
+		return Number(modelData.value).toFixed(decimals) + ' %';
 	}
 
 	return '';
 }
 
 function valueLeftTopChanged() {
-	if (modelData.chValue === undefined) {
+	if (modelData.value === undefined) {
 		/* connection error */
 		return '---';
 	}
@@ -49,46 +49,46 @@ function valueLeftTopChanged() {
 }
 
 function valueRightTopChanged() {
-	if (modelData.chValue === undefined) {
+	if (modelData.value === undefined) {
 		/* connection error */
 		return '---';
 	}
 
-	if (modelData.chType === 'datetime') {
+	if (modelData.type === 'datetime') {
 		itemValueRightTop.visible = true;
-		return Qt.formatDate(modelData.chValue, 'd.M.yyyy');
+		return Qt.formatDate(modelData.value, 'd.M.yyyy');
 	}
 	return '';
 }
 
 function valueSetRequest() {
-	console.log('value set request on ' + modelData.chName);
-	console.log(modelData.chMethod + ' ' + modelData.chMode + ' ' + modelData.chType);
-	console.log(modelData.chFirstChild);
+	console.log('value set request on ' + modelData.name);
+	console.log(modelData.method + ' ' + modelData.mode + ' ' + modelData.type);
+	console.log(modelData.firstChild);
 
-	var channel = modelData.chThis;
+	var channel = modelData.this;
 
-	if (modelData.chMethod !== 'push' || modelData.chMode !== 'sink') {
-		if (!modelData.chFirstChild) {
+	if (modelData.method !== 'push' || modelData.mode !== 'sink') {
+		if (!modelData.firstChild) {
 			return;
 		}
-		if (modelData.chFirstChild.chMethod !== 'push' || modelData.chFirstChild.chMode !== 'sink') {
+		if (modelData.firstChild.method !== 'push' || modelData.firstChild.mode !== 'sink') {
 			return;
 		}
 
-		channel = modelData.chFirstChild;
+		channel = modelData.firstChild;
 	}
 
-	if (channel.chType === 'datetime') {
-		channel.chValue = new Date();
+	if (channel.type === 'datetime') {
+		channel.value = new Date();
 	}
 }
 
 function valueSliderChanged() {
-	if (modelData.chValue === undefined) {
+	if (modelData.value === undefined) {
 		/* connection error etc */
 		return 0;
 	}
 
-	return Number(modelData.chValue);
+	return Number(modelData.value);
 }

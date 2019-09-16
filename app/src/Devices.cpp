@@ -6,25 +6,41 @@
 Devices::Devices(QObject *parent) :
 	QObject(parent), timer(this)
 {
+	QSettings settings;
+	int size = settings.beginReadArray("devices");
+	for (int i = 0; i < size; i++) {
+		settings.setArrayIndex(i);
+		addDevice(settings.value("address").toString(), settings.value("port").toInt());
+	}
+	settings.endArray();
+
 	scannerBt = NULL;
 	scannerUdp = NULL;
+}
+
+Devices::~Devices()
+{
+	QSettings settings;
+	settings.beginWriteArray("devices");
+	for (int i = 0; i < streams.size(); i++) {
+		settings.setArrayIndex(i);
+		settings.setValue("address", streams[i]->getAddress());
+		settings.setValue("port", streams[i]->getPort());
+	}
+	settings.endArray();
 }
 
 void Devices::scan()
 {
 	/* create and start bluetooth scanner */
-	if (1) {
-		if (!scannerBt) {
-			scannerBt = new QBluetoothDeviceDiscoveryAgent(this);
-			connect(scannerBt, SIGNAL(deviceDiscovered(QBluetoothDeviceInfo)),
-			        this, SLOT(scannerBtFoundDevice(QBluetoothDeviceInfo)));
-			connect(scannerBt, SIGNAL(finished()), this, SLOT(scannerBtFinished()));
-		}
-		if (!scannerBt->isActive()) {
-			scannerBt->start();
-		}
-	} else {
-		qDebug() << "no bluetooth adapters found, skip bluetooth";
+	if (!scannerBt) {
+		scannerBt = new QBluetoothDeviceDiscoveryAgent(this);
+		connect(scannerBt, SIGNAL(deviceDiscovered(QBluetoothDeviceInfo)),
+		        this, SLOT(scannerBtFoundDevice(QBluetoothDeviceInfo)));
+		connect(scannerBt, SIGNAL(finished()), this, SLOT(scannerBtFinished()));
+	}
+	if (!scannerBt->isActive()) {
+		scannerBt->start();
 	}
 
 	/* create and start udp scanner */
@@ -53,11 +69,7 @@ bool Devices::isScanning() const
 
 void Devices::scannerBtFoundDevice(const QBluetoothDeviceInfo &device)
 {
-	DeviceStream *stream = new DeviceStream(this, device.address().toString());
-	connect(stream, SIGNAL(received(QString)), this, SLOT(deviceStreamReceiveData(QString)));
-	stream->start();
-	streams.append(stream);
-
+	addDevice(device.address().toString());
 	qDebug() << "found bluetooth device at address" << device.address();
 }
 
@@ -75,23 +87,33 @@ void Devices::scannerUdpHasData()
 		data.resize(int(scannerUdp->pendingDatagramSize()));
 		scannerUdp->readDatagram(data.data(), data.size(), &address);
 		if (data.startsWith("tcp:")) {
-			quint16 port = data.mid(4).toInt();
-
-			DeviceStream *stream = new DeviceStream(this, address.toString(), port);
-			connect(stream, SIGNAL(received(QString)), this, SLOT(deviceStreamReceiveData(QString)));
-			stream->start();
-			streams.append(stream);
-
-			qDebug() << "found tcp device at " << address.toString() << port;
+			addDevice(address.toString(), data.mid(4).toInt());
+			qDebug() << "found tcp device at " << address.toString() << data.mid(4).toInt();
 		}
 	}
+}
+
+void Devices::addDevice(QString address, int port)
+{
+	/* skip existing devices */
+	foreach (DeviceStream *stream, streams) {
+		if (stream->getAddress() == address && stream->getPort() == port) {
+			return;
+		}
+	}
+	/* new device, add to streams */
+	qDebug() << "new device" << address << port;
+	DeviceStream *stream = new DeviceStream(this, address, port);
+	connect(stream, SIGNAL(received(QString)), this, SLOT(deviceStreamReceiveData(QString)));
+	stream->start();
+	streams.append(stream);
 }
 
 void Devices::deviceStreamReceiveData(QString data)
 {
 	DeviceStream *stream = (DeviceStream *)sender();
 	if (data.startsWith("config:")) {
-		qDebug() << data;
+		qDebug() << "received config data:" << data;
 		parseConfigLine(stream, data);
 	} else {
 		stream->receiveData(data);

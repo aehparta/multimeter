@@ -10,51 +10,57 @@ import "."
 Rectangle {
 	id: item
 	width: parent.width
-	color: Style.channelBackgroundColor
+	color: Style.channel.background
 	clip: true
 	height: itemIcon.height + valuesViewContainer.height + 20;
-	border.width: 2
-	border.color: Style.channelBorderColor
-	anchors.topMargin: 15
 
-	Image {
-		id: itemIcon
+	Rectangle {
+		id: header
 		anchors.top: parent.top
+		height: itemIcon.height + 20
+		anchors.right: parent.right
 		anchors.left: parent.left
-		anchors.topMargin: 10
-		anchors.leftMargin: 10
-		source: 'qrc:/icons/' + (groupType == 'switch' ? (groupValue ? 'switch-on' : 'switch') : groupType) + '.png';
-		height: itemLabel.height;
-		fillMode: Image.PreserveAspectFit
+		color: Style.channel.background
 
-		MouseArea {
-			anchors.fill: parent
-			onClicked: {
-				if (groupType == 'switch')
-				{
-					groupValue = !groupValue;
+		Image {
+			id: itemIcon
+			anchors.top: parent.top
+			anchors.left: parent.left
+			anchors.topMargin: 10
+			anchors.leftMargin: 10
+			source: 'qrc:/icons/' + (groupType == 'switch' ? (groupValue ? 'switch-on' : 'switch') : groupType) + '.png';
+			height: label.height;
+			fillMode: Image.PreserveAspectFit
+
+			MouseArea {
+				anchors.fill: parent
+				onClicked: {
+					if (groupType == 'switch')
+					{
+						groupValue = !groupValue;
+					}
 				}
 			}
 		}
-	}
 
-	Text {
-		id: itemLabel
-		anchors.top: parent.top
-		anchors.left: itemIcon.right
-		anchors.topMargin: 10
-		anchors.leftMargin: 10
-		text: groupName
-		font.pointSize: 30
-		color: Style.channelNameColor
+		Text {
+			id: label
+			anchors.top: parent.top
+			anchors.left: itemIcon.right
+			anchors.topMargin: 10
+			anchors.leftMargin: 10
+			text: groupName
+			font: Style.channel.label.font
+			color: Style.channel.label.color
 
-		MouseArea {
-			anchors.fill: parent
-			onClicked: {
-				if (!groupNameIsStatic)
-				{
-					dialogRenameValue.text = itemLabel.text
-					dialogRename.open();
+			MouseArea {
+				anchors.fill: parent
+				onClicked: {
+					if (!groupNameIsStatic)
+					{
+						dialogRenameValue.text = label.text
+						dialogRename.open();
+					}
 				}
 			}
 		}
@@ -64,7 +70,7 @@ Rectangle {
 		id: valuesViewContainer
 		anchors.right: parent.right
 		anchors.left: parent.left
-		anchors.top: itemIcon.bottom
+		anchors.top: header.bottom
 		spacing: 2
 		Repeater {
 			id: valuesView
@@ -81,13 +87,13 @@ Rectangle {
 					id: channelValue
 					anchors.right: parent.right
 					anchors.left: parent.left
-					visible: (modelData.chType != 'slider')
+					visible: (modelData.type != 'slider')
 				}
 				ChannelSlider {
 					id: channelSlider
 					anchors.right: parent.right
 					anchors.left: parent.left
-					visible: (modelData.chType == 'slider')
+					visible: (modelData.type == 'slider')
 				}
 			}
 		}
@@ -110,7 +116,7 @@ Rectangle {
 	Component {
 		id: delegateValue
 		Loader {
-			sourceComponent: modelData.chType != 'slider' ? componentChannelValue : componentChannelSlider
+			sourceComponent: modelData.type != 'slider' ? componentChannelValue : componentChannelSlider
 		}
 	}
 
@@ -121,7 +127,7 @@ Rectangle {
 		standardButtons: StandardButton.Save | StandardButton.Cancel
 
 		onAccepted: {
-			itemLabel.text = dialogRenameValue.text;
+			label.text = dialogRenameValue.text;
 		}
 
 		TextInput {

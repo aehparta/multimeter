@@ -5,45 +5,45 @@
 DeviceGroup::DeviceGroup(QObject *parent) :
 	QObject(parent)
 {
-	connect(parent, SIGNAL(chNameChanged()), this, SLOT(forwardNameChanged()));
-	connect(parent, SIGNAL(chTypeChanged()), this, SLOT(forwardTypeChanged()));
-	connect(parent, SIGNAL(chValueChanged()), this, SLOT(forwardValueChanged()));
+	connect(parent, SIGNAL(nameChanged()), this, SLOT(forwardNameChanged()));
+	connect(parent, SIGNAL(typeChanged()), this, SLOT(forwardTypeChanged()));
+	connect(parent, SIGNAL(valueChanged()), this, SLOT(forwardValueChanged()));
 }
 
 QString DeviceGroup::getGroupName() const
 {
 	DeviceChannel *channel = (DeviceChannel *)parent();
-	return channel->chGetName();
+	return channel->getName();
 }
 
 void DeviceGroup::setGroupName(const QString &name)
 {
 	DeviceChannel *channel = (DeviceChannel *)parent();
-	channel->chSetName(name);
+	channel->setName(name);
 }
 
 bool DeviceGroup::isGroupNameStatic() const
 {
 	DeviceChannel *channel = (DeviceChannel *)parent();
-	return channel->chGetNameStatic();
+	return channel->isNameStatic();
 }
 
 QString DeviceGroup::getGroupType() const
 {
 	DeviceChannel *channel = (DeviceChannel *)parent();
-	return channel->chGetType();
+	return channel->getType();
 }
 
 QVariant DeviceGroup::getGroupValue() const
 {
 	DeviceChannel *channel = (DeviceChannel *)parent();
-	return channel->chGetValue();
+	return channel->getValue();
 }
 
 void DeviceGroup::setGroupValue(const QVariant &value)
 {
 	DeviceChannel *channel = (DeviceChannel *)parent();
-	channel->chSetValue(value);
+	channel->setValue(value);
 }
 
 QList<QObject *> DeviceGroup::getGroupChannels()

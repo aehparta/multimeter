@@ -1,7 +1,7 @@
 
 #include "DeviceStream.h"
 
-DeviceStream::DeviceStream(QObject *parent, QString address, quint16 port) :
+DeviceStream::DeviceStream(QObject *parent, QString address, int port) :
 	QObject(parent), reconnectTimer(this), waitConfigTimer(this)
 {
 	connect(&reconnectTimer, SIGNAL(timeout()), this, SLOT(reconnectTry()));
@@ -20,9 +20,19 @@ DeviceStream::DeviceStream(QObject *parent, QString address, quint16 port) :
 	m_stringDataReadBuffer.clear();
 }
 
+QString DeviceStream::getAddress()
+{
+	return m_address;
+}
+
+int DeviceStream::getPort()
+{
+	return m_port;
+}
+
 int DeviceStream::start()
 {
-	if (m_port == 0) {
+	if (m_port < 0) {
 		m_btSocket = new QBluetoothSocket(QBluetoothServiceInfo::RfcommProtocol);
 		connect(m_btSocket, SIGNAL(error(QBluetoothSocket::SocketError)), this, SLOT(connectionError(QBluetoothSocket::SocketError)));
 		connect(m_btSocket, SIGNAL(connected()), this, SLOT(connectionReady()));
@@ -122,7 +132,7 @@ void DeviceStream::dataReadReady()
 DeviceChannel *DeviceStream::getChannel(int id, bool create)
 {
 	foreach (DeviceChannel *channel, channels) {
-		if (channel->chGetIndex() == id) {
+		if (channel->getIndex() == id) {
 			return channel;
 		}
 	}
@@ -142,7 +152,7 @@ QList<QObject *> DeviceStream::getChannels()
 	QList<QObject *> chs;
 
 	foreach (DeviceChannel *channel, channels) {
-		if (channel->chHasValidParentChannel()) {
+		if (channel->hasValidParentChannel()) {
 			continue;
 		}
 		if (channel->isConnected()) {
@@ -161,7 +171,7 @@ QList<DeviceChannel *> DeviceStream::getChannelsByParent(int parent)
 		if (!channel->isConnected()) {
 			continue;
 		}
-		if (channel->chGetParentChannel() == parent) {
+		if (channel->getParentChannel() == parent) {
 			chs.append(channel);
 		}
 	}
@@ -181,7 +191,7 @@ bool DeviceStream::receiveData(QString data)
 		if (!c->isConnected()) {
 			continue;
 		}
-		if (c->chGetIndex() == channel_number) {
+		if (c->getIndex() == channel_number) {
 			channel = c;
 			break;
 		}

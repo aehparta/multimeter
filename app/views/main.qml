@@ -30,19 +30,20 @@ ApplicationWindow {
 		}
 	}
 
-	ColumnLayout {
+	Column {
 		anchors.fill: parent
 
 		ListView {
 			id: channels
-			anchors.top: parent.top
-			anchors.bottom: parent.bottom
-			anchors.left: parent.left
-			anchors.right: parent.right
+			anchors.fill: parent
 			clip: true
 			focus: true
 			model: channelsModel
-			//spacing: 2
+			spacing: Style.channel.spacing
+
+			Rectangle {
+				
+			}
 
 			delegate: DeviceView {
 			}

@@ -51,18 +51,20 @@ int wifi_init(void);
 		"config:channel:D:method:push\n" \
 		"config:channel:D:color:000000:0000ff\n" \
 		"config:channel:D:parent:A\n" \
-		"config:channel:E:static:name:Voltage\n" \
-		"config:channel:E:type:voltage\n" \
-		"config:channel:E:divider:1000\n" \
-		"config:channel:E:resolution:0.001\n" \
-		"config:channel:F:static:name:Current\n" \
-		"config:channel:F:type:current\n" \
-		"config:channel:F:divider:1000\n" \
-		"config:channel:F:resolution:0.001\n" \
 		"config:channel:G:static:name:Wattage\n" \
 		"config:channel:G:type:wattage\n" \
 		"config:channel:G:divider:1000\n" \
 		"config:channel:G:resolution:0.001\n" \
+		"config:channel:E:static:name:Voltage\n" \
+		"config:channel:E:type:voltage\n" \
+		"config:channel:E:divider:1000\n" \
+		"config:channel:E:resolution:0.001\n" \
+		"config:channel:E:parent:G\n" \
+		"config:channel:F:static:name:Current\n" \
+		"config:channel:F:type:current\n" \
+		"config:channel:F:divider:1000\n" \
+		"config:channel:F:resolution:0.001\n" \
+		"config:channel:F:parent:G\n" \
 		"config:channel:H:static:name:Resistance\n" \
 		"config:channel:H:type:resistance\n" \
 		"config:channel:H:format:decimal\n" \

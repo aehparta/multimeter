@@ -5,243 +5,243 @@
 #include "DeviceStream.h"
 
 
-DeviceChannel::DeviceChannel(int index, QObject *parent) :
+DeviceChannel::DeviceChannel(int ind, QObject *parent) :
 	QObject(parent), timer(this)
 {
 	connect(&timer, SIGNAL(timeout()), this, SLOT(timedValuePull()));
 
-	chIndex = index;
-	chParentChannel = -1;
-	chIsNameStatic = true;
+	index = ind;
+	parentChannel = -1;
+	nameStatic = true;
 
-	chAveraging = "true rms";
+	averaging = "true rms";
 
-	chMode = "source";
-	chMethod = "push";
-	chFormat = "hex";
-	chInterval = 1.0;
-	chResolution = 1.0;
-	chZero = 0.0;
-	chDivider = 1.0;
+	mode = "source";
+	method = "push";
+	format = "hex";
+	interval = 1.0;
+	resolution = 1.0;
+	zero = 0.0;
+	divider = 1.0;
 
-	chValue = QVariant::fromValue(0);
+	value = QVariant::fromValue(0);
 }
 
-int DeviceChannel::chGetIndex() const
+int DeviceChannel::getIndex() const
 {
-	return chIndex;
+	return index;
 }
 
 bool DeviceChannel::isConnected()
 {
-	if (chName.isEmpty()) {
+	if (name.isEmpty()) {
 		return false;
 	}
-	if (chType.isEmpty()) {
+	if (type.isEmpty()) {
 		return false;
 	}
 	return true;
 }
 
-DeviceChannel *DeviceChannel::chGetThis()
+DeviceChannel *DeviceChannel::getThis()
 {
 	return this;
 }
 
-QString DeviceChannel::chGetName() const
+QString DeviceChannel::getName() const
 {
-	return chName;
+	return name;
 }
 
-void DeviceChannel::chSetName(const QString &value, bool isStatic)
+void DeviceChannel::setName(const QString &value, bool isStatic)
 {
-	if (chName != value) {
-		chName = value;
-		chIsNameStatic = isStatic;
-		emit chNameChanged();
+	if (name != value) {
+		name = value;
+		nameStatic = isStatic;
+		emit nameChanged();
 	}
 }
 
-bool DeviceChannel::chGetNameStatic() const
+bool DeviceChannel::isNameStatic() const
 {
-	return chIsNameStatic;
+	return nameStatic;
 }
 
-QVariant DeviceChannel::chGetValue() const
+QVariant DeviceChannel::getValue() const
 {
-	return chValue;
+	return value;
 }
 
-void DeviceChannel::chSetValue(const QVariant &value)
+void DeviceChannel::setValue(const QVariant &v)
 {
-	if (chValue != value) {
-		chValue = value;
-		if (chMethod == "push" && chMode == "sink") {
+	if (value != v) {
+		value = v;
+		if (method == "push" && mode == "sink") {
 			DeviceStream *stream = (DeviceStream *)parent();
-			char channel_name = chIndex + 'A';
+			char channel_name = index + 'A';
 			QString str;
 			str += channel_name;
 
-			if (chType == "datetime") {
-				str += chValue.toDateTime().toString("yyyy-MM-ddThh:mm:ss");
-			} else if (chType == "switch") {
-				str += chValue.toBool() ? "1" : "0";
-			} else if (chValue.canConvert<int>()) {
-				if (chFormat == "hex") {
-					str += QString("%1").arg(chValue.toInt(), 0, 16);
+			if (type == "datetime") {
+				str += value.toDateTime().toString("yyyy-MM-ddThh:mm:ss");
+			} else if (type == "switch") {
+				str += value.toBool() ? "1" : "0";
+			} else if (value.canConvert<int>()) {
+				if (format == "hex") {
+					str += QString("%1").arg(value.toInt(), 0, 16);
 				} else {
-					str += chValue.toInt();
+					str += value.toInt();
 				}
 			} else {
-				str += chValue.toString();
+				str += value.toString();
 			}
 
 			if (str.length() > 1) {
 				stream->send(str);
 			}
 		}
-		emit chValueChanged();
+		emit valueChanged();
 	}
 }
 
-QString DeviceChannel::chGetType() const
+QString DeviceChannel::getType() const
 {
-	return chType;
+	return type;
 }
 
-void DeviceChannel::chSetType(const QString &value)
+void DeviceChannel::setType(const QString &value)
 {
-	if (chType != value) {
-		chType = value;
-		emit chTypeChanged();
+	if (type != value) {
+		type = value;
+		emit typeChanged();
 	}
 }
 
-QString DeviceChannel::chGetMode() const
+QString DeviceChannel::getMode() const
 {
-	return chMode;
+	return mode;
 }
 
-void DeviceChannel::chSetMode(const QString &value)
+void DeviceChannel::setMode(const QString &value)
 {
-	if (chMode != value) {
-		chMode = value;
-		emit chModeChanged();
+	if (mode != value) {
+		mode = value;
+		emit modeChanged();
 	}
 
-	/* start timer in chSetMode() AND in chSetMethod(), since either
+	/* start timer in setMode() AND in setMethod(), since either
 	 * can change and have impact on how data should be
 	 * retrieved
 	 */
-	if (chMethod == "pull" && chMode == "source" && !timer.isActive()) {
-		int interval = chInterval * 1000;
+	if (method == "pull" && mode == "source" && !timer.isActive()) {
+		int interval = interval * 1000;
 		timer.start(interval > 0 ? interval : 1000);
 	}
 }
 
-QString DeviceChannel::chGetMethod() const
+QString DeviceChannel::getMethod() const
 {
-	return chMethod;
+	return method;
 }
 
-void DeviceChannel::chSetMethod(const QString &value)
+void DeviceChannel::setMethod(const QString &value)
 {
-	if (chMethod != value) {
-		chMethod = value;
-		emit chMethodChanged();
+	if (method != value) {
+		method = value;
+		emit methodChanged();
 	}
 
-	/* start timer in chSetMode() AND in chSetMethod(), since either
+	/* start timer in setMode() AND in setMethod(), since either
 	 * can change and have impact on how data should be
 	 * retrieved
 	 */
-	if (chMethod == "pull" && chMode == "source" && !timer.isActive()) {
-		int interval = chInterval * 1000;
+	if (method == "pull" && mode == "source" && !timer.isActive()) {
+		int interval = interval * 1000;
 		timer.start(interval > 0 ? interval : 1000);
 	}
 }
 
-QString DeviceChannel::chGetFormat() const
+QString DeviceChannel::getFormat() const
 {
-	return chFormat;
+	return format;
 }
 
-void DeviceChannel::chSetFormat(const QString &value)
+void DeviceChannel::setFormat(const QString &value)
 {
-	if (chFormat != value) {
-		chFormat = value;
-		emit chFormatChanged();
+	if (format != value) {
+		format = value;
+		emit formatChanged();
 	}
 }
 
-double DeviceChannel::chGetInterval() const
+double DeviceChannel::getInterval() const
 {
-	return chInterval;
+	return interval;
 }
 
-void DeviceChannel::chSetInterval(const double &value)
+void DeviceChannel::setInterval(const double &value)
 {
-	if (chInterval != value) {
-		chInterval = value;
-		emit chIntervalChanged();
+	if (interval != value) {
+		interval = value;
+		emit intervalChanged();
 	}
 }
 
-double DeviceChannel::chGetResolution() const
+double DeviceChannel::getResolution() const
 {
-	return chResolution;
+	return resolution;
 }
 
-void DeviceChannel::chSetResolution(const double &value)
+void DeviceChannel::setResolution(const double &value)
 {
-	if (chResolution != value) {
-		chResolution = value;
-		emit chResolutionChanged();
+	if (resolution != value) {
+		resolution = value;
+		emit resolutionChanged();
 	}
 }
 
-double DeviceChannel::chGetZero() const
+double DeviceChannel::getZero() const
 {
-	return chZero;
+	return zero;
 }
 
-void DeviceChannel::chSetZero(const double &value)
+void DeviceChannel::setZero(const double &value)
 {
-	if (chZero != value) {
-		chZero = value;
-		emit chZeroChanged();
+	if (zero != value) {
+		zero = value;
+		emit zeroChanged();
 	}
 }
 
-double DeviceChannel::chGetDivider() const
+double DeviceChannel::getDivider() const
 {
-	return chDivider;
+	return divider;
 }
 
-void DeviceChannel::chSetDivider(const double &value)
+void DeviceChannel::setDivider(const double &value)
 {
-	if (chDivider != value) {
-		chDivider = value;
-		emit chDividerChanged();
+	if (divider != value) {
+		divider = value;
+		emit dividerChanged();
 	}
 }
 
-QStringList DeviceChannel::chGetColors() const
+QStringList DeviceChannel::getColors() const
 {
-	return chColors;
+	return colors;
 }
 
-int DeviceChannel::chGetParentChannel() const
+int DeviceChannel::getParentChannel() const
 {
-	return chParentChannel;
+	return parentChannel;
 }
 
-void DeviceChannel::chSetParentChannel(const QString data)
+void DeviceChannel::setParentChannel(const QString data)
 {
 	DeviceStream *stream = (DeviceStream *)parent();
 	int channel_id = (int)data.at(0).toLatin1() - (int)'A';
 
-	if (chParentChannel >= 0) {
+	if (parentChannel >= 0) {
 		return;
 	}
 
@@ -250,29 +250,29 @@ void DeviceChannel::chSetParentChannel(const QString data)
 		return;
 	}
 
-	chParentChannel = channel_id;
+	parentChannel = channel_id;
 	channel->addChildChannel(this);
-	emit chParentChannelChanged();
+	emit parentChannelChanged();
 }
 
-bool DeviceChannel::chHasValidParentChannel() const
+bool DeviceChannel::hasValidParentChannel() const
 {
-	if (chParentChannel < 0) {
+	if (parentChannel < 0) {
 		return false;
 	}
 
 	DeviceStream *stream = (DeviceStream *)parent();
-	if (stream->getChannel(chParentChannel, false)) {
+	if (stream->getChannel(parentChannel, false)) {
 		return true;
 	}
 
 	return false;
 }
 
-DeviceChannel *DeviceChannel::chGetFirstChild() const
+DeviceChannel *DeviceChannel::getFirstChild() const
 {
 	DeviceStream *stream = (DeviceStream *)parent();
-	QList<DeviceChannel *> channels = stream->getChannelsByParent(chIndex);
+	QList<DeviceChannel *> channels = stream->getChannelsByParent(index);
 
 	if (channels.count() > 0) {
 		return channels.first();
@@ -284,7 +284,7 @@ DeviceChannel *DeviceChannel::chGetFirstChild() const
 void DeviceChannel::timedValuePull()
 {
 	DeviceStream *stream = (DeviceStream *)parent();
-	char channel_name = chIndex + 'A';
+	char channel_name = index + 'A';
 	QString str;
 	str += channel_name;
 	stream->send(str);
@@ -298,47 +298,47 @@ bool DeviceChannel::receiveConfigValue(const QStringList data)
 			return false;
 		}
 		/* special case of static name */
-		chSetName(data[5], true);
+		setName(data[5], true);
 		return true;
 	} else if (data[3] == "name") {
-		chSetName(data[4], false);
+		setName(data[4], false);
 		return true;
 	} else if (data[3] == "type") {
-		chSetType(data[4]);
+		setType(data[4]);
 		return true;
 	} else if (data[3] == "mode") {
-		chSetMode(data[4]);
+		setMode(data[4]);
 		return true;
 	} else if (data[3] == "method") {
-		chSetMethod(data[4]);
+		setMethod(data[4]);
 		return true;
 	} else if (data[3] == "interval") {
-		chSetInterval(data[4].toDouble());
+		setInterval(data[4].toDouble());
 		return true;
 	} else if (data[3] == "resolution") {
-		chSetResolution(data[4].toDouble());
+		setResolution(data[4].toDouble());
 		return true;
 	} else if (data[3] == "divider") {
-		chSetDivider(data[4].toDouble());
+		setDivider(data[4].toDouble());
 		return true;
 	} else if (data[3] == "zero") {
-		chSetZero(data[4].toDouble());
+		setZero(data[4].toDouble());
 		return true;
 	} else if (data[3] == "format") {
-		chSetFormat(data[4]);
+		setFormat(data[4]);
 		return true;
 	} else if (data[3] == "parent") {
-		chSetParentChannel(data[4]);
+		setParentChannel(data[4]);
 		return true;
 	} else if (data[3] == "color") {
-		chColors.clear();
+		colors.clear();
 		for (int i = 4; i < data.count(); i++) {
 			QColor color("#" + data[i]);
 			if (color.isValid()) {
-				chColors.append(color.name());
+				colors.append(color.name());
 			}
 		}
-		emit chColorsChanged();
+		emit colorsChanged();
 		return true;
 	}
 
@@ -348,49 +348,49 @@ bool DeviceChannel::receiveConfigValue(const QStringList data)
 bool DeviceChannel::receiveData(QString data)
 {
 	/* special cases first */
-	if (chType == "datetime") {
-		chSetValue(QDateTime::fromString(data, Qt::ISODate));
+	if (type == "datetime") {
+		setValue(QDateTime::fromString(data, Qt::ISODate));
 		return true;
-	} else if (chType == "switch") {
+	} else if (type == "switch") {
 		bool value = (data.at(0) == QChar('0')) ? false : true;
-		chSetValue(value);
+		setValue(value);
 		return true;
 	}
 
 	/* parse value based on format */
 	bool ok = false;
 	double value;
-	if (chFormat == "decimal") {
+	if (format == "decimal") {
 		/* parse float */
 		value = data.toDouble(&ok);
 	} else {
 		/* parse integer value by base */
 		int base = 10;
-		if (chFormat == "hex") {
+		if (format == "hex") {
 			base = 16;
-		} else if (chFormat == "octal") {
+		} else if (format == "octal") {
 			base = 8;
-		} else if (chFormat == "binary") {
+		} else if (format == "binary") {
 			base = 2;
 		}
 		value = (double)data.toLongLong(&ok, base);
 	}
 	if (!ok) {
-		qDebug() << "invalid sample data (format:" << chFormat << "):" << data;
+		qDebug() << "invalid sample data (format:" << format << "):" << data;
 		return false;
 	}
 
 	/* adjust to zero */
-	value -= chZero;
+	value -= zero;
 
 	/* if shannel is sink, then no averaging etc is done */
-	if (chMode == "sink") {
-		chSetValue(QVariant::fromValue(value / chDivider));
+	if (mode == "sink") {
+		setValue(QVariant::fromValue(value / divider));
 		return true;
 	}
 
 	/* adjust value according to averaging */
-	if (chAveraging == "true rms") {
+	if (averaging == "true rms") {
 		value *= value;
 	} else {
 		/* assume simple which is just the value itself */
@@ -407,8 +407,8 @@ bool DeviceChannel::receiveData(QString data)
 		sum += samples[i];
 	}
 
-	double result = sqrt(sum / (double)samples.count()) / chDivider;
-	chSetValue(QVariant::fromValue(result));
+	double result = sqrt(sum / (double)samples.count()) / divider;
+	setValue(QVariant::fromValue(result));
 
 	samples.clear();
 
@@ -418,19 +418,19 @@ bool DeviceChannel::receiveData(QString data)
 void DeviceChannel::stop()
 {
 	timer.stop();
-	chSetValue(QVariant());
+	setValue(QVariant());
 }
 
 void DeviceChannel::addChildChannel(DeviceChannel *channel)
 {
-	chChildChannels.append(channel);
-	emit chChildChannelAdded(channel);
-	emit chValuesChanged();
+	childChannels.append(channel);
+	emit childChannelAdded(channel);
+	emit valuesChanged();
 }
 
-QList<QObject *> DeviceChannel::chGetChildren()
+QList<QObject *> DeviceChannel::getChildren()
 {
-	return chChildChannels;
+	return childChannels;
 }
 
 QList<QObject *> DeviceChannel::getGroupChannels()
@@ -439,12 +439,12 @@ QList<QObject *> DeviceChannel::getGroupChannels()
 
 	values.append(this);
 
-	foreach (QObject *object, chChildChannels) {
+	foreach (QObject *object, childChannels) {
 		DeviceChannel *channel = (DeviceChannel *)object;
 
 		/* some channel values are not displayed */
-		if (channel->chGetMode() == "sink") {
-			if (channel->chGetType() == "datetime") {
+		if (channel->getMode() == "sink") {
+			if (channel->getType() == "datetime") {
 				continue;
 			}
 		}

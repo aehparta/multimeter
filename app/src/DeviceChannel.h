@@ -21,71 +21,71 @@ class DeviceChannel : public QObject
 {
 	Q_OBJECT
 
-	Q_PROPERTY(DeviceChannel * chThis READ chGetThis)
+	Q_PROPERTY(DeviceChannel * this READ getThis)
 
-	Q_PROPERTY(QString chName READ chGetName WRITE chSetName NOTIFY chNameChanged)
-	Q_PROPERTY(bool chIsNameStatic READ chGetNameStatic)
-	Q_PROPERTY(QVariant chValue READ chGetValue WRITE chSetValue NOTIFY chValueChanged)
+	Q_PROPERTY(QString name READ getName WRITE setName NOTIFY nameChanged)
+	Q_PROPERTY(bool isNameStatic READ isNameStatic)
+	Q_PROPERTY(QVariant value READ getValue WRITE setValue NOTIFY valueChanged)
 
-	Q_PROPERTY(QString chType READ chGetType NOTIFY chTypeChanged)
-	Q_PROPERTY(QString chMode READ chGetMode NOTIFY chModeChanged)
-	Q_PROPERTY(QString chMethod READ chGetMethod NOTIFY chMethodChanged)
-	Q_PROPERTY(QString chFormat READ chGetFormat NOTIFY chFormatChanged)
-	Q_PROPERTY(double chInterval READ chGetInterval NOTIFY chIntervalChanged)
-	Q_PROPERTY(double chResolution READ chGetResolution NOTIFY chResolutionChanged)
-	Q_PROPERTY(double chZero READ chGetZero NOTIFY chZeroChanged)
-	Q_PROPERTY(double chDivider READ chGetDivider NOTIFY chDividerChanged)
+	Q_PROPERTY(QString type READ getType NOTIFY typeChanged)
+	Q_PROPERTY(QString mode READ getMode NOTIFY modeChanged)
+	Q_PROPERTY(QString method READ getMethod NOTIFY methodChanged)
+	Q_PROPERTY(QString format READ getFormat NOTIFY formatChanged)
+	Q_PROPERTY(double interval READ getInterval NOTIFY intervalChanged)
+	Q_PROPERTY(double resolution READ getResolution NOTIFY resolutionChanged)
+	Q_PROPERTY(double zero READ getZero NOTIFY zeroChanged)
+	Q_PROPERTY(double divider READ getDivider NOTIFY dividerChanged)
 
-	Q_PROPERTY(QStringList chColors READ chGetColors NOTIFY chColorsChanged)
+	Q_PROPERTY(QStringList colors READ getColors NOTIFY colorsChanged)
 
-	Q_PROPERTY(int chParentChannel READ chGetParentChannel NOTIFY chParentChannelChanged)
-	Q_PROPERTY(DeviceChannel * chFirstChild READ chGetFirstChild)
+	Q_PROPERTY(int parentChannel READ getParentChannel NOTIFY parentChannelChanged)
+	Q_PROPERTY(DeviceChannel * firstChild READ getFirstChild)
 
-	Q_PROPERTY(QList<QObject *> chChildren READ chGetChildren)
+	Q_PROPERTY(QList<QObject *> children READ getChildren)
 
 public:
 	DeviceChannel(int index, QObject *parent);
 
-	int chGetIndex() const;
+	int getIndex() const;
 
 	bool isConnected();
 
-	DeviceChannel *chGetThis();
+	DeviceChannel *getThis();
 
-	QString chGetName() const;
-	void chSetName(const QString &name, bool isStatic = true);
+	QString getName() const;
+	void setName(const QString &name, bool isStatic = true);
 
-	bool chGetNameStatic() const;
+	bool isNameStatic() const;
 
-	QVariant chGetValue() const;
-	void chSetValue(const QVariant &value);
+	QVariant getValue() const;
+	void setValue(const QVariant &value);
 
-	QString chGetType() const;
-	void chSetType(const QString &value);
-	QString chGetMode() const;
-	void chSetMode(const QString &value);
-	QString chGetMethod() const;
-	void chSetMethod(const QString &value);
-	QString chGetFormat() const;
-	void chSetFormat(const QString &value);
-	double chGetInterval() const;
-	void chSetInterval(const double &value);
-	double chGetResolution() const;
-	void chSetResolution(const double &value);
-	double chGetZero() const;
-	void chSetZero(const double &value);
-	double chGetDivider() const;
-	void chSetDivider(const double &value);
+	QString getType() const;
+	void setType(const QString &value);
+	QString getMode() const;
+	void setMode(const QString &value);
+	QString getMethod() const;
+	void setMethod(const QString &value);
+	QString getFormat() const;
+	void setFormat(const QString &value);
+	double getInterval() const;
+	void setInterval(const double &value);
+	double getResolution() const;
+	void setResolution(const double &value);
+	double getZero() const;
+	void setZero(const double &value);
+	double getDivider() const;
+	void setDivider(const double &value);
 
-	QStringList chGetColors() const;
+	QStringList getColors() const;
 
-	int chGetParentChannel() const;
-	void chSetParentChannel(const QString data);
-	bool chHasValidParentChannel() const;
+	int getParentChannel() const;
+	void setParentChannel(const QString data);
+	bool hasValidParentChannel() const;
 
-	DeviceChannel *chGetFirstChild() const;
+	DeviceChannel *getFirstChild() const;
 
-	QList<QObject *> chGetChildren();
+	QList<QObject *> getChildren();
 	QList<QObject *> getGroupChannels();
 
 	bool receiveConfigValue(const QStringList data);
@@ -96,24 +96,24 @@ public:
 	void addChildChannel(DeviceChannel *channel);
 
 signals:
-	void chNameChanged();
-	void chValueChanged();
+	void nameChanged();
+	void valueChanged();
 
-	void chTypeChanged();
-	void chModeChanged();
-	void chMethodChanged();
-	void chFormatChanged();
-	void chIntervalChanged();
-	void chResolutionChanged();
-	void chZeroChanged();
-	void chDividerChanged();
+	void typeChanged();
+	void modeChanged();
+	void methodChanged();
+	void formatChanged();
+	void intervalChanged();
+	void resolutionChanged();
+	void zeroChanged();
+	void dividerChanged();
 
-	void chColorsChanged();
+	void colorsChanged();
 
-	void chParentChannelChanged();
-	void chChildChannelAdded(DeviceChannel *channel);
+	void parentChannelChanged();
+	void childChannelAdded(DeviceChannel *channel);
 
-	void chValuesChanged();
+	void valuesChanged();
 
 public slots:
 	void timedValuePull();
@@ -121,27 +121,27 @@ public slots:
 protected:
 
 private:
-	int chIndex;
-	int chParentChannel;
-	QList<QObject *> chChildChannels;
+	int index;
+	int parentChannel;
+	QList<QObject *> childChannels;
 
-	QString chName;
-	bool chIsNameStatic;
-	QVariant chValue;
+	QString name;
+	bool nameStatic;
+	QVariant value;
 
 	/* default is true rms */
-	QString chAveraging;
+	QString averaging;
 
-	QString chType;
-	QString chMode;
-	QString chMethod;
-	QString chFormat;
-	double chInterval;
-	double chResolution;
-	double chZero;
-	double chDivider;
+	QString type;
+	QString mode;
+	QString method;
+	QString format;
+	double interval;
+	double resolution;
+	double zero;
+	double divider;
 
-	QStringList chColors;
+	QStringList colors;
 
 	QList<double> samples;
 

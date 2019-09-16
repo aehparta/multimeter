@@ -2,21 +2,35 @@ pragma Singleton
 import QtQuick 2.5
 
 QtObject {
-	property color windowBackgroundColor: '#000020'
+	property color windowBackgroundColor: '#264763'
 
 	/* channel */
-	property color channelBackgroundColor: '#000040'
-	property color channelBorderColor: '#000030'
-	property color channelNameColor: '#6080c0'
+	property var channel: QtObject {
+		property color background: '#172737'
+		property var label: QtObject {
+			property color color: '#315a7d'
+			property font font: Qt.font({ pixelSize: 48, weight: 50 })
+		}
+		property int spacing: 1
+	}
 
 	/* value */
-	property color valueMainColor: '#b0f0b0'
-	property color valueSideColor: '#b0f0b0'
+	property var value: QtObject {
+		property color color1: '#7da7ca'
+		property color color2: '#7da7ca'
+		property font font1: Qt.font({ pixelSize: 82, weight: 70 })
+		property font font2: Qt.font({ pixelSize: 32, weight: 70 })
+	}
 
 	/* slider specific */
-	property color sliderColorStart: valueMainColor
-	property color sliderColorEnd: sliderColorStart
-	property color sliderHandleColor: channelNameColor
-	property color sliderHandlePressedColor: sliderHandleColor
-	property color sliderHandleBorderColor: '#000'
+	property var slider: QtObject {
+		property color color: '#070d12'
+		property int height: 24
+		property int radius: 12
+		property var border: QtObject {
+			property color color: '#000000'
+			property int width: 2
+			property int radius: 16
+		}
+	}
 }

@@ -16,6 +16,7 @@
 #include <QUdpSocket>
 #include <QQmlContext>
 #include <QTimer>
+#include <QSettings>
 
 #include "DeviceStream.h"
 #include "DeviceGroup.h"
@@ -30,6 +31,7 @@ class Devices : public QObject
 
 public:
 	Devices(QObject *parent = NULL);
+	~Devices();
 	void setRootContext(QQmlContext *ctxt);
 	Q_INVOKABLE void scan();
 	bool isScanning() const;
@@ -57,6 +59,8 @@ private:
 	QList<QObject *> groups;
 
 	QQmlContext *rootContext;
+
+	void addDevice(QString address, int port = -1);
 
 	void parseConfigLine(DeviceStream *stream, const QString &data);
 	bool parseConfigLineChannel(DeviceStream *stream, const QStringList &data);

@@ -7,27 +7,27 @@ import QtQuick.Layouts 1.0
 import "/js/device.js" as DeviceJs
 import "."
 
-ColumnLayout {
-	property color colorStart: modelData.chColors.length > 0 ? modelData.chColors[0] : Style.sliderColorStart
-	property color colorEnd: modelData.chColors.length > 1 ? modelData.chColors[1] : colorStart
+Column {
+	property color colorStart: modelData.colors.length > 0 ? modelData.colors[0] : Style.slider.color
+	property color colorEnd: modelData.colors.length > 1 ? modelData.colors[1] : colorStart
 
 	Slider {
 		anchors.left: parent.left
 		anchors.right: parent.right
 		anchors.leftMargin: 5
 		anchors.rightMargin: 5
-		value: DeviceJs.valueSliderChanged()
+		// value: DeviceJs.valueSliderChanged()
 		maximumValue: 255
 		minimumValue: 0
 		stepSize: 1
 
 		onValueChanged: {
-			modelData.chValue = value;
+			modelData.value = value;
 		}
 
 		style: SliderStyle {
 			groove: Rectangle {
-				implicitHeight: 16
+				implicitHeight: Style.slider.height
 				layer.enabled: true
 				layer.effect: LinearGradient {
 					end: Qt.point(width, 0)
@@ -36,16 +36,16 @@ ColumnLayout {
 						GradientStop { position: 1.0; color: colorEnd }
 					}
 				}
-				radius: 8
+				radius: Style.slider.radius
 			}
 			handle: Rectangle {
 				anchors.centerIn: parent
-				color: control.pressed ? Style.sliderHandlePressedColor : Style.sliderHandleColor
-				border.color: Style.sliderHandleBorderColor
-				border.width: 2
+				color: colorEnd
+				border.color: Style.slider.border.color
+				border.width: Style.slider.border.width
+				radius: Style.slider.border.radius
 				implicitWidth: 40
 				implicitHeight: 48
-				radius: 16
 			}
 		}
 	}
