@@ -29,67 +29,81 @@ int wifi_init(void);
 #endif
 
 #define MULTIMETER_TEST_CONFIG \
-		"config:channel:A:static:name:RGB\n" \
-		"config:channel:A:type:switch\n" \
-		"config:channel:A:mode:sink\n" \
-		"config:channel:A:method:push\n" \
-		"config:channel:B:static:name:Slider Red\n" \
-		"config:channel:B:type:slider\n" \
-		"config:channel:B:mode:sink\n" \
-		"config:channel:B:method:push\n" \
-		"config:channel:B:color:000000:ff0000\n" \
-		"config:channel:B:parent:A\n" \
-		"config:channel:C:static:name:Slider Green\n" \
-		"config:channel:C:type:slider\n" \
-		"config:channel:C:mode:sink\n" \
-		"config:channel:C:method:push\n" \
-		"config:channel:C:color:000000:00ff00\n" \
-		"config:channel:C:parent:A\n" \
-		"config:channel:D:static:name:Slider Blue\n" \
-		"config:channel:D:type:slider\n" \
-		"config:channel:D:mode:sink\n" \
-		"config:channel:D:method:push\n" \
-		"config:channel:D:color:000000:0000ff\n" \
-		"config:channel:D:parent:A\n" \
-		"config:channel:G:static:name:Wattage\n" \
-		"config:channel:G:type:wattage\n" \
-		"config:channel:G:divider:1000\n" \
-		"config:channel:G:resolution:0.001\n" \
-		"config:channel:E:static:name:Voltage\n" \
-		"config:channel:E:type:voltage\n" \
-		"config:channel:E:divider:1000\n" \
-		"config:channel:E:resolution:0.001\n" \
-		"config:channel:E:parent:G\n" \
-		"config:channel:F:static:name:Current\n" \
-		"config:channel:F:type:current\n" \
-		"config:channel:F:divider:1000\n" \
-		"config:channel:F:resolution:0.001\n" \
-		"config:channel:F:parent:G\n" \
-		"config:channel:H:static:name:Resistance\n" \
-		"config:channel:H:type:resistance\n" \
-		"config:channel:H:format:decimal\n" \
-		"config:channel:H:resolution:0.1\n" \
-		"config:channel:I:static:name:Temperature\n" \
-		"config:channel:I:type:temperature\n" \
-		"config:channel:I:format:decimal\n" \
-		"config:channel:I:resolution:0.1\n" \
-		"config:channel:J:static:name:Humidity\n" \
-		"config:channel:J:type:humidity\n" \
-		"config:channel:J:format:decimal\n" \
-		"config:channel:J:resolution:0.1\n" \
-		"config:channel:K:static:name:Frequency (10kS)\n" \
-		"config:channel:K:type:frequency\n" \
-		"A1\n" \
-		"B25\n" \
-		"C50\n"  \
-		"D75\n" \
-		"E0\n" \
-		"F0\n" \
-		"G0\n" \
-		"H0\n" \
-		"I22.1\n" \
-		"J65.2\n" \
-		"K0\n"
+		"A:name,static:RGB\n" \
+		"A:type:switch\n" \
+		"A:mode:sink\n" \
+		"A:method:push\n" \
+		"B:name,static:Slider Red\n" \
+		"B:type:slider\n" \
+		"B:mode:sink\n" \
+		"B:method:push\n" \
+		"B:color:000000:ff0000\n" \
+		"B:parent:A\n" \
+		"C:name,static:Slider Green\n" \
+		"C:type:slider\n" \
+		"C:mode:sink\n" \
+		"C:method:push\n" \
+		"C:color:000000:00ff00\n" \
+		"C:parent:A\n" \
+		"D:name,static:Slider Blue\n" \
+		"D:type:slider\n" \
+		"D:mode:sink\n" \
+		"D:method:push\n" \
+		"D:color:000000:0000ff\n" \
+		"D:parent:A\n" \
+		"G:name,static:Wattage\n" \
+		"G:type:wattage\n" \
+		"G:mode:source\n" \
+		"G:method:push\n" \
+		"G:multiplier:0.001\n" \
+		"G:resolution:0.05\n" \
+		"E:name,static:Voltage\n" \
+		"E:type:voltage\n" \
+		"E:mode:source\n" \
+		"E:method:push\n" \
+		"E:multiplier:0.001\n" \
+		"E:resolution:0.001\n" \
+		"E:parent:G\n" \
+		"F:name,static:Current\n" \
+		"F:type:current\n" \
+		"F:mode:source\n" \
+		"F:method:push\n" \
+		"F:multiplier:0.001\n" \
+		"F:resolution:0.001\n" \
+		"F:parent:G\n" \
+		"H:name,static:Resistance\n" \
+		"H:type:resistance\n" \
+		"H:mode:source\n" \
+		"H:method:push\n" \
+		"H:base:10\n" \
+		"H:resolution:5\n" \
+		"I:name,static:Temperature\n" \
+		"I:type:temperature\n" \
+		"I:mode:source\n" \
+		"I:method:push\n" \
+		"I:base:10\n" \
+		"I:resolution:0.1\n" \
+		"J:name,static:Humidity\n" \
+		"J:type:humidity\n" \
+		"J:mode:source\n" \
+		"J:method:push\n" \
+		"J:base:10\n" \
+		"J:resolution:0.1\n" \
+		"K:name,static:Frequency (10kS)\n" \
+		"K:type:frequency\n" \
+		"K:mode:source\n" \
+		"K:method:push\n" \
+		"A=1\n" \
+		"B=25\n" \
+		"C=50\n"  \
+		"D=75\n" \
+		"E=0\n" \
+		"F=0\n" \
+		"G=0\n" \
+		"H=0\n" \
+		"I=22.1\n" \
+		"J=65.2\n" \
+		"K=0\n"
 
 #define MULTIMETER_TCP_PORT     11111
 #define MULTIMETER_UDP_PORT     17001
@@ -239,7 +253,7 @@ int p_recv(int fd)
 			*p = '\0';
 		}
 		/* check action */
-		if (strncmp("get:config", line, n) == 0) {
+		if (strncmp("get config", line, n) == 0) {
 			dprintf(fd, "%s", MULTIMETER_TEST_CONFIG);
 			last_client = fd;
 		} else if (strncmp("quit", line, n) == 0) {
@@ -282,7 +296,7 @@ void p_run(void)
 			U = U < 0.0 ? 0.0 : U;
 			I = I < 0.0 ? 0.0 : I;
 			if (last_client > 0) {
-				dprintf(last_client, "E%04x\nF%04x\nG%04x\nH%lf\n",
+				dprintf(last_client, "E=%04x\nF=%04x\nG=%04x\nH=%lf\n",
 				        (unsigned int)(U * 1000.0),
 				        (unsigned int)(I * 1000.0),
 				        (unsigned int)(U * I * 1000.0),
