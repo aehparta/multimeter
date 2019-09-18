@@ -1,4 +1,5 @@
 import QtQuick 2.12
+import QtQuick.Controls 1.4
 import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.12
 import "."
@@ -33,7 +34,7 @@ ApplicationWindow {
 
 					MouseArea {
 						anchors.fill: parent
-						// onClicked: pages.currentIndex = 1
+						onClicked: contentView.push(devicesView)
 					}
 				}
 
@@ -43,6 +44,11 @@ ApplicationWindow {
 
 					text: '☰'
 					font: navLabel.font
+
+					MouseArea {
+						anchors.fill: parent
+						onClicked: contentView.push(datetimePickerView)
+					}
 				}
 			}
 		}
@@ -54,23 +60,66 @@ ApplicationWindow {
 		}
 
 		/* content */
-		ScrollView {
-			clip: true
+		StackView {
+			id: contentView
+			initialItem: channelsView
 			Layout.fillWidth: true
 			Layout.fillHeight: true
-			ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
-			ScrollBar.vertical.policy: ScrollBar.AlwaysOff
+		}
 
-			Flow {
-				id: channelsView
-				spacing: 5
-				width: window.width
+		/* channels view */
+		Component {
+			id: channelsView
+			ScrollView {
+				clip: true
+				ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
+				ScrollBar.vertical.policy: ScrollBar.AlwaysOff
 
-				Repeater {
-					id: channelsRepeater
-					model: scan.channels
-					delegate: Channel {
+				Flow {
+					id: channelsView
+					spacing: 5
+					width: window.width
 
+					Repeater {
+						id: channelsRepeater
+						model: scan.channels
+						delegate: Channel {
+
+						}
+					}
+				}
+			}
+		}
+
+		/* devices view */
+		Component {
+			id: devicesView
+			Rectangle {
+				Layout.fillWidth: true
+				Layout.fillHeight: true
+				color: '#ff0000'
+			}
+		}
+
+		/* date and time picker */
+		Component {
+			id: datetimePickerView
+			ColumnLayout {
+				Layout.fillWidth: true
+				Layout.fillHeight: true
+				Calendar {
+					frameVisible: false
+					Layout.fillWidth: true
+					Layout.fillHeight: true
+					Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
+				}
+				RowLayout {
+					Layout.fillWidth: true
+					Tumbler {
+						model: 24
+					}
+					Tumbler {
+						model: 60
 					}
 				}
 			}
