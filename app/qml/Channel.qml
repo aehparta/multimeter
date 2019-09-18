@@ -1,31 +1,72 @@
 
-import QtQuick 2.5
+import QtQuick 2.12
 import QtQuick.Layouts 1.12
+import QtGraphicalEffects 1.12
 
-ColumnLayout {
-	width: window.width / parseInt(window.width / 400) - channelsView.spacing
-	clip: true
-	Layout.margins: 5
+Rectangle {
+	width: window.width / parseInt(window.width / 500) - channelsView.spacing
+	height: content.height + 20
+	color: 'transparent'
 
-	/* header */
-	ChannelHeader {
-		id: header
-		Layout.fillWidth: true
+	/* background (borders) */
+	RectangularGlow {
+		anchors.fill: content
+		glowRadius: 10
+		spread: 0.05
+		color: '#303070'
+		cornerRadius: 0
 	}
 
-	Rectangle {
+	/* content */
+	Column {
 		id: content
-		height: value.height
-		color: '#ff0000'
-		Layout.fillWidth: true
+		width: parent.width - 20
+		anchors.centerIn: parent
+		clip: true
+		spacing: 0
 
-		Text {
-			id: value
-			anchors.top: parent.top
-			anchors.right: parent.right
-			text: modelData.value
-			font: Qt.font({ pixelSize: 82, weight: 70 })
+		/* header */
+		ChannelHeader {
+			width: parent.width
+		}
+
+		Rectangle {
+			height: value.height
+			width: parent.width
+			color: '#9090e0'
+
+			Text {
+				id: value
+				anchors.bottom: parent.bottom
+				anchors.right: unit.left
+				text: modelData.value
+				color: '#000000'
+				font: Qt.font({ pixelSize: 96, weight: 90 })
+			}
+
+			Text {
+				id: unit
+				anchors.bottom: parent.bottom
+				anchors.right: parent.right
+				text: {
+					var units = {
+						current: 'A',
+						frequency: 'Hz',
+						humidity: '%',
+						resistance: 'Ω',
+						voltage: 'V',
+						wattage: 'W',
+						/* temperature scales */
+						temperature: '°C',
+						celsius: '°C',
+						kelvin: 'K',
+						fahrenheit: '°F',
+					};
+					return units[modelData.type] !== undefined ? ' ' + units[modelData.type] : '';
+				}
+				color: '#101030'
+				font: Qt.font({ pixelSize: 96, weight: 90 })
+			}
 		}
 	}
-
 }

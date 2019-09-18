@@ -3,6 +3,7 @@
 
 #include <QTcpSocket>
 #include <QBluetoothSocket>
+#include "channel.h"
 
 class Device : public QObject
 {
@@ -19,11 +20,14 @@ public:
 	Q_INVOKABLE void stop();
 	Q_INVOKABLE void send(const QString &data);
 
+	QMap<char, Channel *> channels();
+
 signals:
 	void connected();
 	void disconnected();
 	void error();
 	void receive(QString data);
+	void channelsChanged();
 
 private slots:
 	void connectionReady();
@@ -31,10 +35,19 @@ private slots:
 	void readReady();
 
 private:
+	/* tcp network socket */
 	QTcpSocket *m_socket_tcp;
+	/* bluetooth socket */
 	QBluetoothSocket *m_socket_bt;
+	/* device address */
 	QString m_address;
+	/* device port, -1 if not used */
 	int m_port;
+	/* channels */
+	QMap<char, Channel *> m_channels;
+
+	/* receive data */
+	void recv(const QString &data);
 };
 
 #endif

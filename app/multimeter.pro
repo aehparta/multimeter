@@ -10,9 +10,9 @@ android {
 	DEFINES += USE_ANDROID
 }
 
-SOURCES += src/app.cpp src/device.cpp src/scan.cpp
+SOURCES += src/app.cpp src/device.cpp src/scan.cpp src/channel.cpp
 
-HEADERS += src/device.h src/scan.h
+HEADERS += src/device.h src/scan.h src/channel.h
 
 RESOURCES += multimeter.qrc
 

@@ -72,8 +72,65 @@ void Device::send(const QString &data)
 	}
 }
 
+QMap<char, Channel *> Device::channels()
+{
+	return m_channels;
+}
+
+void Device::recv(const QString &data)
+{
+	/* extract channel id and validate */
+	char channel_id = data.at(0).toLatin1();
+	if (channel_id < 'A' || channel_id > 'Z') {
+		/* invalid channel, must be upper-case ascii letter */
+		return;
+	}
+
+	/* check if this is a data line */
+	if (data.at(1) == '=') {
+		/* skip if this is not yet a valid channel */
+		if (!m_channels.contains(channel_id)) {
+			return;
+		}
+		if (!m_channels[channel_id]->isValid()) {
+			return;
+		}
+		/* valid channel data received */
+		m_channels[channel_id]->recv(data.mid(2));
+		return;
+	}
+
+	/* check if this is a configuration line */
+	if (data.at(1) == ':') {
+		/* extract value */
+		QString value = data.section(':', 2);
+		/* extract full key description */
+		QString key = data.section(':', 1, 1);
+		if (key.size() < 1) {
+			/* key was invalid */
+			return;
+		}
+		/* extract options from key */
+		QStringList options = key.split(',', QString::SkipEmptyParts);
+		key = options.takeFirst();
+		/* TODO: handle options */
+
+		/* create new channel into list if it does not yet exist */
+		Channel *channel = m_channels[channel_id];
+		if (!channel) {
+			m_channels[channel_id] = channel = new Channel(this);
+			emit channelsChanged();
+		}
+		/* set value */
+		channel->setProperty(key.toStdString().c_str(), value);
+	}
+}
+
 void Device::connectionReady()
 {
+	/* send config request to device */
+	send("get config");
+	/* inform that we are now connected */
 	emit connected();
 }
 
@@ -85,24 +142,29 @@ void Device::connectionError(QBluetoothSocket::SocketError)
 
 void Device::readReady()
 {
+	/* read data from one of the connected sockets */
 	if (m_socket_tcp) {
+		/* tcp network socket */
 		while (m_socket_tcp->canReadLine()) {
 			QByteArray line = m_socket_tcp->readLine();
 			QString data;
 			data.append(line);
 			data = data.trimmed();
 			if (!data.isEmpty()) {
+				recv(data);
 				emit receive(data);
 			}
 		}
 	}
 	if (m_socket_bt) {
+		/* bluetooth socket */
 		while (m_socket_bt->canReadLine()) {
 			QByteArray line = m_socket_bt->readLine();
 			QString data;
 			data.append(line);
 			data = data.trimmed();
 			if (!data.isEmpty()) {
+				recv(data);
 				emit receive(data);
 			}
 		}

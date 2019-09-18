@@ -1,9 +1,10 @@
 
-import QtQuick 2.5
+import QtQuick 2.12
 
 Rectangle {
-	color: '#303090'
-	height: icon.height + icon.anchors.topMargin * 2
+	id: header
+	height: icon.height + icon.anchors.topMargin * 2 + footer.height
+	color: '#6060a0'
 
 	Image {
 		id: icon
@@ -35,5 +36,20 @@ Rectangle {
 		text: modelData.name
 		color: '#101040'
 		font: Qt.font({ pixelSize: 48, weight: 70 })
+	}
+
+	/* footer (bottom border) */
+	Rectangle {
+		id: footer
+		anchors.bottom: parent.bottom
+		anchors.left: parent.left
+		anchors.right: parent.right
+		height: 2
+		color: '#303070'
+		// height: 7
+		// gradient: Gradient {
+		// 	GradientStop { position: 0.0; color: header.color }
+		// 	GradientStop { position: 1.0; color: '#303070' }
+		// }
 	}
 }
