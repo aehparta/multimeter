@@ -14,6 +14,7 @@ class Scan : public QObject
 	Q_PROPERTY(bool active READ isActive NOTIFY changedActive)
 	Q_PROPERTY(bool autostart MEMBER m_autostart NOTIFY autostartChanged)
 	Q_PROPERTY(QList<QObject *> channels READ channels NOTIFY channelsChanged)
+	Q_PROPERTY(QList<QObject *> devices READ devices NOTIFY devicesChanged)
 
 	const int BCAST_PORT = 17001;
 
@@ -23,6 +24,7 @@ public:
 	Q_INVOKABLE void start();
 	bool isActive();
 	QList<QObject *> channels();
+	QList<QObject *> devices();
 
 signals:
 	void started();
@@ -31,6 +33,7 @@ signals:
 	void discovered(Device *device);
 	void autostartChanged();
 	void channelsChanged();
+	void devicesChanged();
 
 private slots:
 	void btDiscovered(const QBluetoothDeviceInfo &);
@@ -48,9 +51,7 @@ private:
 	/* autostart discovered devices */
 	bool m_autostart;
 	/* list of devices found */
-	QList<Device *> m_devices;
-	/* list of channels */
-	// QMap<QString, QMap *> m_channels;
+	QList<QObject *> m_devices;
 
 	/* add new device */
 	void addDevice(const QString &address, int port = -1);

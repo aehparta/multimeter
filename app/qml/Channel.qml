@@ -5,13 +5,14 @@ import QtGraphicalEffects 1.12
 
 Rectangle {
 	width: window.width / parseInt(window.width / 500) - channelsView.spacing
-	height: content.height + 20
+	height: content.height + 10
 	color: 'transparent'
+	visible: modelData.enabled
 
 	/* background (borders) */
 	RectangularGlow {
 		anchors.fill: content
-		glowRadius: 10
+		glowRadius: 7
 		spread: 0.05
 		color: '#303070'
 		cornerRadius: 0
@@ -20,7 +21,7 @@ Rectangle {
 	/* content */
 	Column {
 		id: content
-		width: parent.width - 20
+		width: parent.width - 10
 		anchors.centerIn: parent
 		clip: true
 		spacing: 0

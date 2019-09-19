@@ -3,6 +3,9 @@
         <file>qml/app.qml</file>
         <file>qml/Channel.qml</file>
         <file>qml/ChannelHeader.qml</file>
+        <file>qml/Channels.qml</file>
+        <file>qml/Device.qml</file>
+        <file>qml/Devices.qml</file>
 
         <file>js/app.js</file>
         <file>js/device.js</file>
@@ -19,5 +22,8 @@
         <file>icons/slider.png</file>
         <file>icons/temperature.png</file>
         <file>icons/humidity.png</file>
+
+        <file>fonts/fa-solid-900.ttf</file>
+        <file>fonts/fa-regular-400.ttf</file>
     </qresource>
 </RCC>

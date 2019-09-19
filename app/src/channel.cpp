@@ -7,12 +7,17 @@ Channel::Channel(QObject *parent) :	QObject(parent)
 	m_multiplier = 1;
 	m_resolution = 1;
 
+	m_enabled = true;
+
 	m_wasValid = false;
 
 	connect(this, SIGNAL(nameChanged()), this, SLOT(checkValid()));
 	connect(this, SIGNAL(typeChanged()), this, SLOT(checkValid()));
 	connect(this, SIGNAL(modeChanged()), this, SLOT(checkValid()));
 	connect(this, SIGNAL(methodChanged()), this, SLOT(checkValid()));
+
+	/* connect to device enabled changed signal */
+	connect(parent, SIGNAL(enabledChanged()), this, SLOT(deviceEnabled()));
 }
 
 bool Channel::isValid()
@@ -50,10 +55,28 @@ void Channel::recv(QString data)
 	emit valueChanged();
 }
 
+bool Channel::isEnabled()
+{
+	return parent()->property("enabled").toBool() && m_enabled;
+}
+
+void Channel::setEnabled(bool value)
+{
+	if (m_enabled != value) {
+		m_enabled = value;
+		emit enabledChanged();
+	}
+}
+
 void Channel::checkValid()
 {
 	if (isValid() != m_wasValid) {
 		m_wasValid = isValid();
 		emit validChanged();
 	}
+}
+
+void Channel::deviceEnabled()
+{
+	emit enabledChanged();
 }

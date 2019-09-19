@@ -17,6 +17,8 @@ class Channel : public QObject
 	Q_PROPERTY(double multiplier MEMBER m_multiplier NOTIFY multiplierChanged)
 	Q_PROPERTY(double resolution MEMBER m_resolution NOTIFY resolutionChanged)
 
+	Q_PROPERTY(bool enabled READ isEnabled WRITE setEnabled NOTIFY enabledChanged)
+
 	Q_PROPERTY(bool valid READ isValid NOTIFY validChanged)
 	Q_PROPERTY(QList<QObject *> children MEMBER m_children NOTIFY childrenChanged)
 
@@ -25,6 +27,9 @@ public:
 	bool isValid();
 	void recv(QString data);
 
+	bool isEnabled();
+	void setEnabled(bool value);
+	
 signals:
 	void nameChanged();
 	void typeChanged();
@@ -36,11 +41,14 @@ signals:
 	void multiplierChanged();
 	void resolutionChanged();
 
+	void enabledChanged();
+
 	void validChanged();
 	void childrenChanged();
 
 private slots:
 	void checkValid();
+	void deviceEnabled();
 
 private:
 	/* basic properties */
@@ -55,6 +63,10 @@ private:
 	double m_multiplier;
 	/* number resolution */
 	double m_resolution;
+
+	/* device enabled */
+	bool m_enabled;
+
 	/* internals */
 	bool m_wasValid;
 	QList<QObject *> m_children;

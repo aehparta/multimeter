@@ -8,6 +8,9 @@
 class Device : public QObject
 {
 	Q_OBJECT
+	Q_PROPERTY(QString name MEMBER m_name NOTIFY nameChanged)
+	Q_PROPERTY(bool enabled MEMBER m_enabled NOTIFY enabledChanged)
+	Q_PROPERTY(QList<QObject *> channels READ channels NOTIFY channelsChanged)
 
 public:
 	Device(QObject *parent, QString address, int port = -1);
@@ -20,9 +23,12 @@ public:
 	Q_INVOKABLE void stop();
 	Q_INVOKABLE void send(const QString &data);
 
-	QMap<char, Channel *> channels();
+	QList<QObject *> channels();
 
 signals:
+	void nameChanged();
+	void enabledChanged();
+
 	void connected();
 	void disconnected();
 	void error();
@@ -35,6 +41,11 @@ private slots:
 	void readReady();
 
 private:
+	/* device name, if given */
+	QString m_name;
+	/* device enabled */
+	bool m_enabled;
+
 	/* tcp network socket */
 	QTcpSocket *m_socket_tcp;
 	/* bluetooth socket */
@@ -44,7 +55,7 @@ private:
 	/* device port, -1 if not used */
 	int m_port;
 	/* channels */
-	QMap<char, Channel *> m_channels;
+	QMap<char, QObject *> m_channels;
 
 	/* receive data */
 	void recv(const QString &data);

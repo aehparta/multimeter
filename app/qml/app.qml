@@ -1,3 +1,4 @@
+
 import QtQuick 2.12
 import QtQuick.Controls 1.4
 import QtQuick.Controls 2.12
@@ -11,6 +12,10 @@ ApplicationWindow {
 	height: 800
 	color: '#171743'
 
+	Devices {
+		id: devicesView
+	}
+
 	ColumnLayout {
 		anchors.fill: parent
 
@@ -22,20 +27,29 @@ ApplicationWindow {
 			RowLayout {
 				anchors.fill: parent
 
-				Text {
+				Label {
+					Layout.leftMargin: 20
+
+					text: '\uf054'
+					color: '#000000'
+					font: Qt.font({ pixelSize: 36, weight: 80, family: 'Font Awesome 5 Free' })
+
+					MouseArea {
+						anchors.fill: parent
+						onClicked: devicesView.open()
+					}
+				}
+
+				Label {
 					id: navLabel
 					clip: true
 					Layout.fillWidth: true
 					Layout.leftMargin: 20
 					Layout.rightMargin: 20
 
-					text: '➤ All devices'
-					font: Qt.font({ pixelSize: 36, weight: 50 })
-
-					MouseArea {
-						anchors.fill: parent
-						onClicked: contentView.push(devicesView)
-					}
+					text: 'All devices'
+					color: '#202040'
+					font: Qt.font({ pixelSize: 36, weight: 80 })
 				}
 
 				Text {
@@ -70,34 +84,7 @@ ApplicationWindow {
 		/* channels view */
 		Component {
 			id: channelsView
-			ScrollView {
-				clip: true
-				ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
-				ScrollBar.vertical.policy: ScrollBar.AlwaysOff
-
-				Flow {
-					id: channelsView
-					spacing: 5
-					width: window.width
-
-					Repeater {
-						id: channelsRepeater
-						model: scan.channels
-						delegate: Channel {
-
-						}
-					}
-				}
-			}
-		}
-
-		/* devices view */
-		Component {
-			id: devicesView
-			Rectangle {
-				Layout.fillWidth: true
-				Layout.fillHeight: true
-				color: '#ff0000'
+			Channels {
 			}
 		}
 

@@ -29,7 +29,7 @@ int wifi_init(void);
 #endif
 
 #define MULTIMETER_TEST_CONFIG \
-		"DEVICE:name,static:example-tcp\n" \
+		"device:name,static:example-tcp (%d)\n" \
 		"A:name,static:RGB\n" \
 		"A:type:switch\n" \
 		"A:mode:sink\n" \
@@ -262,7 +262,7 @@ int p_recv(int fd)
 		}
 		/* check action */
 		if (strncmp("get config", line, n) == 0) {
-			dprintf(fd, "%s", MULTIMETER_TEST_CONFIG);
+			dprintf(fd, MULTIMETER_TEST_CONFIG, tcp_port);
 			last_client = fd;
 		} else if (strncmp("quit", line, n) == 0) {
 			close(fd);

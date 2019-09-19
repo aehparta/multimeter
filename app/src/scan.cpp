@@ -49,8 +49,10 @@ QList<QObject *> Scan::channels()
 {
 	QList<QObject *> list;
 
-	foreach (Device *device, m_devices) {
-		foreach (Channel *channel, device->channels()) {
+	foreach (QObject *o, m_devices) {
+		Device *device = (Device *)o;
+		foreach (QObject *oo, device->channels()) {
+			Channel *channel = (Channel *)oo;
 			if (channel->isValid()) {
 				list.append(channel);
 			}
@@ -58,6 +60,11 @@ QList<QObject *> Scan::channels()
 	}
 
 	return list;
+}
+
+QList<QObject *> Scan::devices()
+{
+	return m_devices;
 }
 
 void Scan::btDiscovered(const QBluetoothDeviceInfo &dev)
@@ -116,6 +123,7 @@ void Scan::addDevice(const QString &address, int port)
 		/* autostart device */
 		device->start();
 	}
-	/* emit discovered */
+	/* emit discovery*/
 	emit discovered(device);
+	emit devicesChanged();
 }
