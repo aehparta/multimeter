@@ -12,7 +12,7 @@ Device::Device(QObject *parent, bool enabled, QString address, int port) : QObje
 	m_socket_tcp = NULL;
 	m_socket_bt = NULL;
 
-	qDebug() << "new device" << id();
+	qDebug() << "new device" << id() << m_channels.size();
 }
 
 Device::Device(QObject *parent, QString settings_group) : QObject(parent)
@@ -33,7 +33,7 @@ Device::Device(QObject *parent, QString settings_group) : QObject(parent)
 	m_socket_tcp = NULL;
 	m_socket_bt = NULL;
 
-	qDebug() << "new device from config" << id();
+	qDebug() << "new device from config" << id() << m_channels.size();
 }
 
 Device::~Device()
@@ -191,14 +191,39 @@ void Device::recv(const QString &data)
 		/* TODO: handle options */
 
 		/* create new channel into list if it does not yet exist */
-		Channel *channel = (Channel *)m_channels[channel_id];
+		Channel *channel = m_channels.contains(channel_id) ? (Channel *)m_channels[channel_id] : NULL;
 		if (!channel) {
-			channel = new Channel(this);
+			channel = new Channel(this, channel_id);
+			/* check if there are child channels, that were added before, waiting for this parent */
+			foreach (QObject *o, m_channels) {
+				if (((Channel *)o)->parentChannel() == channel_id) {
+					channel->addChild((Channel *)o);
+				}
+			}
+			/* append to device channels */
 			m_channels[channel_id] = (QObject *)channel;
+			/* connect to parent change */
+			connect(channel, SIGNAL(parentChanged()), this, SLOT(channelChanged()));
+			/* connect to children change */
+			connect(channel, SIGNAL(childrenChanged()), this, SLOT(channelChanged()));
+			/* inform that new channel has been added */
 			emit channelsChanged();
 		}
 		/* set value */
-		channel->setProperty(key.toStdString().c_str(), value);
+		if (key == "parent") {
+			char parent_id = value.toStdString().c_str()[0];
+			channel->setParentChannel(parent_id);
+			/* find parent channel, if it already exists, and add this child to it */
+			foreach (QObject *o, m_channels) {
+				Channel *c = (Channel *)o;
+				if (c->id() == parent_id && c->id() != channel_id) {
+					c->addChild(channel);
+					break;
+				}
+			}
+		} else {
+			channel->setProperty(key.toStdString().c_str(), value);
+		}
 		return;
 	}
 }
@@ -246,4 +271,9 @@ void Device::readReady()
 			}
 		}
 	}
+}
+
+void Device::channelChanged()
+{
+	emit channelsChanged();
 }

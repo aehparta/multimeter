@@ -12,7 +12,7 @@ Rectangle {
 		anchors.left: parent.left
 		anchors.topMargin: 10
 		anchors.leftMargin: 10
-		source: 'qrc:/icons/' + (modelData.type == 'switch' ? (modelData.value ? 'switch-on' : 'switch') : modelData.type) + '.png';
+		source: 'qrc:/icons/' + (modelData.type == 'switch' ? (modelData.value == '0' ? 'switch' : 'switch-on') : modelData.type) + '.png';
 		height: label.height;
 		fillMode: Image.PreserveAspectFit
 
@@ -20,8 +20,7 @@ Rectangle {
 			anchors.fill: parent
 			onClicked: {
 				if (modelData.type == 'switch') {
-					modelData.xxx = true;
-					// modelData.set('value', !modelData.value);
+					modelData.value = modelData.value == '0' ? '1' : '0';
 				}
 			}
 		}

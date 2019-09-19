@@ -4,7 +4,7 @@ import QtQuick.Layouts 1.12
 import QtGraphicalEffects 1.12
 
 Rectangle {
-	width: window.width / parseInt(window.width / 500) - channelsView.spacing
+	width: window.width / parseInt(window.width < 500 ? 1 : window.width / 500) - channelsView.spacing
 	height: content.height + 10
 	color: 'transparent'
 	visible: modelData.enabled
@@ -31,42 +31,14 @@ Rectangle {
 			width: parent.width
 		}
 
-		Rectangle {
-			height: value.height
+		ChannelValue {
 			width: parent.width
-			color: '#9090e0'
+		}
 
-			Text {
-				id: value
-				anchors.bottom: parent.bottom
-				anchors.right: unit.left
-				text: modelData.value
-				color: '#000000'
-				font: Qt.font({ pixelSize: 96, weight: 90 })
-			}
-
-			Text {
-				id: unit
-				anchors.bottom: parent.bottom
-				anchors.right: parent.right
-				text: {
-					var units = {
-						current: 'A',
-						frequency: 'Hz',
-						humidity: '%',
-						resistance: 'Ω',
-						voltage: 'V',
-						wattage: 'W',
-						/* temperature scales */
-						temperature: '°C',
-						celsius: '°C',
-						kelvin: 'K',
-						fahrenheit: '°F',
-					};
-					return units[modelData.type] !== undefined ? ' ' + units[modelData.type] : '';
-				}
-				color: '#101030'
-				font: Qt.font({ pixelSize: 96, weight: 90 })
+		Repeater {
+			model: modelData.children
+			delegate: ChannelValue {
+				width: parent.width
 			}
 		}
 	}

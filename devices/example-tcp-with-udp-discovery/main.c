@@ -267,14 +267,18 @@ int p_recv(int fd)
 		} else if (strncmp("quit", line, n) == 0) {
 			close(fd);
 			FD_CLR(fd, &r_fds);
-		} else if (line[0] == 'A' && n > 1) {
-			printf("Switch is now %s\n", line[1] == '0' ? "off" :  "on");
-		} else if (line[0] == 'B' && n > 1) {
-			printf("Red slider to %ld\n", strtol(line + 1, NULL, 16));
-		} else if (line[0] == 'C' && n > 1) {
-			printf("Green slider to %ld\n", strtol(line + 1, NULL, 16));
-		} else if (line[0] == 'D' && n > 1) {
-			printf("Blue slider to %ld\n", strtol(line + 1, NULL, 16));
+		} else if (n > 2) {
+			if (line[1] != '=') {
+				/* skip invalid sets */
+			} else if (line[0] == 'A') {
+				printf("Switch is now %s\n", line[2] == '0' ? "off" :  "on");
+			} else if (line[0] == 'B') {
+				printf("Red slider to %ld\n", strtol(line + 2, NULL, 16));
+			} else if (line[0] == 'C') {
+				printf("Green slider to %ld\n", strtol(line + 2, NULL, 16));
+			} else if (line[0] == 'D') {
+				printf("Blue slider to %ld\n", strtol(line + 2, NULL, 16));
+			}
 		}
 	}
 

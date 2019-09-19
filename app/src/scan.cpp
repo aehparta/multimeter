@@ -66,7 +66,7 @@ QList<QObject *> Scan::channels()
 		Device *device = (Device *)o;
 		foreach (QObject *oo, device->channels()) {
 			Channel *channel = (Channel *)oo;
-			if (channel->isValid()) {
+			if (channel->isValid() && !channel->parentChannel()) {
 				list.append(channel);
 			}
 		}

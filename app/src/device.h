@@ -45,7 +45,8 @@ private slots:
 	void connectionReady();
 	void connectionError(QBluetoothSocket::SocketError error);
 	void readReady();
-
+	void channelChanged();
+	
 private:
 	/* device name, if given */
 	QString m_name;

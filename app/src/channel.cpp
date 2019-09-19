@@ -1,8 +1,12 @@
 
+#include "device.h"
 #include "channel.h"
 
-Channel::Channel(QObject *parent) :	QObject(parent)
+Channel::Channel(QObject *parent, char id) : QObject(parent)
 {
+	m_id = id;
+	m_parent = 0;
+
 	m_base = 16;
 	m_multiplier = 1;
 	m_resolution = 1;
@@ -20,12 +24,72 @@ Channel::Channel(QObject *parent) :	QObject(parent)
 	connect(parent, SIGNAL(enabledChanged()), this, SLOT(deviceEnabled()));
 }
 
+char Channel::id()
+{
+	return m_id;
+}
+
+char Channel::parentChannel()
+{
+	return m_parent;
+}
+
+void Channel::setParentChannel(char parent_id)
+{
+	if (parent_id != m_parent && 'A' <= parent_id && parent_id <= 'Z') {
+		m_parent = parent_id;
+		emit parentChanged();
+	}
+}
+
+bool Channel::hasChild(char child_id)
+{
+	foreach (QObject *o, m_children) {
+		if (((Channel *)o)->id() == child_id) {
+			return true;
+		}
+	}
+	return false;
+}
+
+bool Channel::hasChild(Channel *channel)
+{
+	foreach (QObject *o, m_children) {
+		if (((Channel *)o)->id() == channel->id()) {
+			return true;
+		}
+	}
+	return false;
+}
+
+void Channel::addChild(Channel *channel)
+{
+	if (!hasChild(channel)) {
+		m_children.append(channel);
+		emit childrenChanged();
+	}
+}
+
+QString Channel::value()
+{
+	return m_value;
+}
+
+void Channel::setValue(QString value)
+{
+	if (m_value != value) {
+		m_value = value;
+		send(m_value);
+		emit valueChanged();
+	}
+}
+
 bool Channel::isValid()
 {
 	return !m_name.isEmpty() && !m_type.isEmpty() && !m_mode.isEmpty() && !m_method.isEmpty();
 }
 
-void Channel::recv(QString data)
+void Channel::recv(const QString &data)
 {
 	/* as default parse number */
 	double number = 0;
@@ -53,6 +117,12 @@ void Channel::recv(QString data)
 	/* change value */
 	m_value = QString::number(number, 'f', decimals);
 	emit valueChanged();
+}
+
+void Channel::send(const QString &data)
+{
+	Device *device = (Device *)parent();
+	device->send(QString(m_id) + "=" + data);
 }
 
 bool Channel::isEnabled()

@@ -7,11 +7,13 @@
 class Channel : public QObject
 {
 	Q_OBJECT
+	Q_PROPERTY(char id MEMBER m_id CONSTANT)
 	Q_PROPERTY(QString name MEMBER m_name NOTIFY nameChanged)
 	Q_PROPERTY(QString type MEMBER m_type NOTIFY typeChanged)
 	Q_PROPERTY(QString mode MEMBER m_mode NOTIFY modeChanged)
 	Q_PROPERTY(QString method MEMBER m_method NOTIFY methodChanged)
-	Q_PROPERTY(QString value MEMBER m_value NOTIFY valueChanged)
+	Q_PROPERTY(char parent READ parentChannel WRITE setParentChannel NOTIFY parentChanged)
+	Q_PROPERTY(QString value READ value WRITE setValue NOTIFY valueChanged)
 
 	Q_PROPERTY(unsigned int base MEMBER m_base NOTIFY baseChanged)
 	Q_PROPERTY(double multiplier MEMBER m_multiplier NOTIFY multiplierChanged)
@@ -23,9 +25,21 @@ class Channel : public QObject
 	Q_PROPERTY(QList<QObject *> children MEMBER m_children NOTIFY childrenChanged)
 
 public:
-	Channel(QObject *parent = NULL);
+	Channel(QObject *parent, char id);
+
+	char id();
+	char parentChannel();
+	void setParentChannel(char parent_id);
+	bool hasChild(char child_id);
+	bool hasChild(Channel *channel);
+	void addChild(Channel *channel);
+
+	QString value();
+	void setValue(QString value);
+
 	bool isValid();
-	void recv(QString data);
+	void recv(const QString &data);
+	void send(const QString &data);
 
 	bool isEnabled();
 	void setEnabled(bool value);
@@ -35,6 +49,7 @@ signals:
 	void typeChanged();
 	void modeChanged();
 	void methodChanged();
+	void parentChanged();
 	void valueChanged();
 
 	void baseChanged();
@@ -52,10 +67,12 @@ private slots:
 
 private:
 	/* basic properties */
+	char m_id;
 	QString m_name;
 	QString m_type;
 	QString m_mode;
 	QString m_method;
+	char m_parent;
 	QString m_value;
 	/* number base (default is 16 (hex)) */
 	unsigned int m_base;

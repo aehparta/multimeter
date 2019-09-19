@@ -4,6 +4,7 @@
         <file>qml/Channel.qml</file>
         <file>qml/ChannelHeader.qml</file>
         <file>qml/Channels.qml</file>
+        <file>qml/ChannelValue.qml</file>
         <file>qml/Device.qml</file>
         <file>qml/Devices.qml</file>
 
