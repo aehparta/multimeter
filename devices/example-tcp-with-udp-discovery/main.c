@@ -29,6 +29,7 @@ int wifi_init(void);
 #endif
 
 #define MULTIMETER_TEST_CONFIG \
+		"DEVICE:name,static:example-tcp\n" \
 		"A:name,static:RGB\n" \
 		"A:type:switch\n" \
 		"A:mode:sink\n" \
@@ -105,10 +106,10 @@ int wifi_init(void);
 		"J=65.2\n" \
 		"K=0\n"
 
-#define MULTIMETER_TCP_PORT     11111
 #define MULTIMETER_UDP_PORT     17001
 
 static int tcp_fd = -1;
+static int tcp_port = 0;
 static int udp_fd = -1;
 static fd_set r_fds, w_fds;
 static int max_fd = -1;
@@ -123,6 +124,7 @@ int p_init(void)
 {
 	int opt;
 	struct sockaddr_in addr;
+	socklen_t size;
 
 #ifdef TARGET_ESP32
 	/* initialize networking = wifi when using esp32 */
@@ -148,11 +150,11 @@ int p_init(void)
 		return -1;
 	}
 
-	/* bind to specific port */
+	/* bind to random port */
 	memset(&addr, 0, sizeof(addr));
 	addr.sin_family = AF_INET;
 	addr.sin_addr.s_addr = htonl(INADDR_ANY);
-	addr.sin_port = htons(MULTIMETER_TCP_PORT);
+	addr.sin_port = htons(tcp_port);
 	if (bind(tcp_fd, &addr, sizeof(addr)) < 0) {
 		fprintf(stderr, "bind() failed\n");
 		return -1;
@@ -163,6 +165,12 @@ int p_init(void)
 		fprintf(stderr, "listen() failed\n");
 		return -1;
 	}
+
+	/* get port which was selected randomly, needed later for clients */
+	size = sizeof(addr);
+	getsockname(tcp_fd, &addr, &size);
+	tcp_port = ntohs(addr.sin_port);
+	printf("using random port: %d\n", tcp_port);
 
 	/* create and setup udp socket */
 	udp_fd = socket(AF_INET, SOCK_DGRAM, 0);
@@ -235,7 +243,7 @@ int p_recv(int fd)
 			addr.sin_family = AF_INET;
 			addr.sin_addr.s_addr = htonl(INADDR_BROADCAST);
 			addr.sin_port = htons(MULTIMETER_UDP_PORT);
-			sprintf(line, "tcp:%u", MULTIMETER_TCP_PORT);
+			sprintf(line, "tcp:%d", tcp_port);
 			sendto(udp_fd, line, strlen(line), 0, (struct sockaddr *)&addr, sizeof(addr));
 		}
 		return 0;
