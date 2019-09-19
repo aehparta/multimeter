@@ -12,15 +12,6 @@ Rectangle {
 		id: content
 		
 		RowLayout {
-			Label {
-				width: 100
-				text: channels.visible ? '\uf078' : '\uf054'
-				font: Qt.font({ pixelSize: 64, weight: 80, family: 'Font Awesome 5 Free' })
-				MouseArea {
-					anchors.fill: parent
-					onClicked: channels.visible = !channels.visible
-				}
-			}
 			CheckBox {
 				checked: modelData.enabled
 				onClicked: modelData.enabled = checked
@@ -33,9 +24,18 @@ Rectangle {
 					font: Qt.font({ pixelSize: 36, weight: 50 })
 				}
 				Label {
-					text: modelData.id()
+					text: modelData.address() + (modelData.port() < 0 ? '' : ':' + modelData.port())
 					color: '#303060'
 					font: Qt.font({ pixelSize: 24, weight: 50 })
+				}
+			}
+			Label {
+				width: 100
+				text: channels.visible ? '\uf078' : '\uf054'
+				font: Qt.font({ pixelSize: 64, weight: 80, family: 'Font Awesome 5 Free' })
+				MouseArea {
+					anchors.fill: parent
+					onClicked: channels.visible = !channels.visible
 				}
 			}
 		}

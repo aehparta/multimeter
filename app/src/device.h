@@ -3,6 +3,9 @@
 
 #include <QTcpSocket>
 #include <QBluetoothSocket>
+#include <QSettings>
+#include <QCryptographicHash>
+#include <QHostAddress>
 #include "channel.h"
 
 class Device : public QObject
@@ -13,8 +16,11 @@ class Device : public QObject
 	Q_PROPERTY(QList<QObject *> channels READ channels NOTIFY channelsChanged)
 
 public:
-	Device(QObject *parent, QString address, int port = -1);
+	Device(QObject *parent, bool enabled, QString address, int port = -1);
+	Device(QObject *parent, QString settings_group);
+	~Device();
 
+	QString name();
 	Q_INVOKABLE QString id();
 	Q_INVOKABLE QString address();
 	Q_INVOKABLE int port();

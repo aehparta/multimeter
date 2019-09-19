@@ -1,20 +1,71 @@
 
 #include "device.h"
 
-Device::Device(QObject *parent, QString address, int port) : QObject(parent)
+Device::Device(QObject *parent, bool enabled, QString address, int port) : QObject(parent)
 {
 	m_address = address;
 	m_port = port;
+
+	m_name = id();
+	m_enabled = enabled;
+
 	m_socket_tcp = NULL;
 	m_socket_bt = NULL;
 
-	m_name = id();
-	m_enabled = true;
+	qDebug() << "new device" << id();
+}
+
+Device::Device(QObject *parent, QString settings_group) : QObject(parent)
+{
+	QSettings settings;
+	settings.beginGroup("devices");
+	settings.beginGroup(settings_group);
+
+	/* load device information */
+	m_name = settings.value("name").toString();
+	m_address = settings.value("address").toString();
+	m_port = settings.value("port").toInt();
+	m_enabled = settings.value("enabled").toBool();
+
+	settings.endGroup();
+	settings.endGroup();
+
+	m_socket_tcp = NULL;
+	m_socket_bt = NULL;
+
+	qDebug() << "new device from config" << id();
+}
+
+Device::~Device()
+{
+	if (m_address.isEmpty()) {
+		qDebug() << "invalid device?" << m_address << m_port;
+		return;
+	}
+
+	QSettings settings;
+	settings.beginGroup("devices");
+	settings.beginGroup(id());
+
+	/* save device information */
+	settings.setValue("name", m_name);
+	settings.setValue("address", m_address);
+	settings.setValue("port", m_port);
+	settings.setValue("enabled", m_enabled);
+
+	settings.endGroup();
+	settings.endGroup();
+}
+
+QString Device::name()
+{
+	return m_name;
 }
 
 QString Device::id()
 {
-	return m_address + "_" + (m_port > 0 ? QString::number(m_port) : "bt");
+	QString id = m_address + "_" + m_port;
+	return QString(QCryptographicHash::hash(id.toStdString().c_str(), QCryptographicHash::Sha256).toHex());
 }
 
 QString Device::address()

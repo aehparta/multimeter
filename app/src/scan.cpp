@@ -5,7 +5,20 @@ Scan::Scan(QObject *parent) : QObject(parent)
 {
 	m_scanner_bt = NULL;
 	m_scanner_udp = NULL;
-	m_autostart = false;
+	m_autostart = true;
+
+	/* preload saved devices */
+	QSettings settings;
+	settings.beginGroup("devices");
+	QStringList ids = settings.childGroups();
+	settings.endGroup();
+	foreach (QString id, ids) {
+		addDevice(new Device(this, id));
+	}
+}
+
+Scan::~Scan()
+{
 }
 
 void Scan::start()
@@ -86,6 +99,11 @@ void Scan::udpHasData()
 		data.resize(int(m_scanner_udp->pendingDatagramSize()));
 		m_scanner_udp->readDatagram(data.data(), data.size(), &address);
 		if (data.startsWith("tcp:")) {
+			bool ok;
+			quint32 ipv4 = address.toIPv4Address(&ok);
+			if (ok) {
+				address.setAddress(ipv4);
+			}
 			addDevice(address.toString(), data.mid(4).toInt());
 		}
 	}
@@ -112,9 +130,20 @@ void Scan::deviceChannelsChanged()
 	}
 }
 
-void Scan::addDevice(const QString &address, int port)
+bool Scan::addDevice(const QString &address, int port)
 {
-	Device *device = new Device(this, address, port);
+	return addDevice(new Device(this, true, address, port));
+}
+
+bool Scan::addDevice(Device *device)
+{
+	/* check that this device does not already exist */
+	foreach (QObject *o, m_devices) {
+		if (((Device *)o)->id() == device->id()) {
+			delete device;
+			return false;
+		}
+	}
 	/* connect to device channels changed signal */
 	connect(device, SIGNAL(channelsChanged()), this, SLOT(deviceChannelsChanged()));
 	/* append to list of devices */
@@ -126,4 +155,6 @@ void Scan::addDevice(const QString &address, int port)
 	/* emit discovery*/
 	emit discovered(device);
 	emit devicesChanged();
+
+	return true;
 }

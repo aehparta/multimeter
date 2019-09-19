@@ -20,6 +20,7 @@ class Scan : public QObject
 
 public:
 	Scan(QObject *parent = NULL);
+	~Scan();
 
 	Q_INVOKABLE void start();
 	bool isActive();
@@ -54,7 +55,8 @@ private:
 	QList<QObject *> m_devices;
 
 	/* add new device */
-	void addDevice(const QString &address, int port = -1);
+	bool addDevice(const QString &address, int port = -1);
+	bool addDevice(Device *device);
 };
 
 
