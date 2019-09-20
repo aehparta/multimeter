@@ -29,86 +29,100 @@ int wifi_init(void);
 #endif
 
 #define MULTIMETER_TEST_CONFIG \
-		"device:name,static:example-tcp (%d)\n" \
-		"A:name,static:RGB\n" \
+		"device:name:example-tcp (%d)\n" \
+		"A:name:RGB\n" \
 		"A:type:switch\n" \
 		"A:mode:sink\n" \
 		"A:method:push\n" \
-		"B:name,static:Slider Red\n" \
+		"B:name:Slider Red\n" \
 		"B:type:slider\n" \
 		"B:mode:sink\n" \
 		"B:method:push\n" \
 		"B:color:#000000,#ff0000\n" \
 		"B:parent:A\n" \
-		"C:name,static:Slider Green\n" \
+		"C:name:Slider Green\n" \
 		"C:type:slider\n" \
 		"C:mode:sink\n" \
 		"C:method:push\n" \
 		"C:color:#000000,#00ff00\n" \
 		"C:parent:A\n" \
-		"D:name,static:Slider Blue\n" \
+		"D:name:Slider Blue\n" \
 		"D:type:slider\n" \
 		"D:mode:sink\n" \
 		"D:method:push\n" \
 		"D:color:#000000,#0000ff\n" \
 		"D:parent:A\n" \
-		"G:name,static:Wattage\n" \
+		"G:name:Wattage\n" \
 		"G:type:wattage\n" \
 		"G:mode:source\n" \
 		"G:method:push\n" \
 		"G:multiplier:0.001\n" \
 		"G:resolution:0.05\n" \
 		"G:parent:M\n" \
-		"E:name,static:Voltage\n" \
+		"E:name:Voltage (mV)\n" \
 		"E:type:voltage\n" \
 		"E:mode:source\n" \
 		"E:method:push\n" \
 		"E:multiplier:0.001\n" \
 		"E:resolution:0.001\n" \
 		"E:parent:G\n" \
-		"F:name,static:Current\n" \
+		"E:divider:0.001\n" \
+		"F:name:Current\n" \
 		"F:type:current\n" \
 		"F:mode:source\n" \
 		"F:method:push\n" \
 		"F:multiplier:0.001\n" \
 		"F:resolution:0.001\n" \
 		"F:parent:G\n" \
-		"H:name,static:Resistance\n" \
+		"H:name:Resistance\n" \
 		"H:type:resistance\n" \
 		"H:mode:source\n" \
 		"H:method:push\n" \
 		"H:base:10\n" \
 		"H:resolution:5\n" \
 		"H:parent:M\n" \
-		"I:name,static:Temperature\n" \
+		"I:name:Temperature\n" \
 		"I:type:temperature\n" \
 		"I:mode:source\n" \
 		"I:method:push\n" \
 		"I:base:10\n" \
-		"I:resolution:0.1\n" \
-		"J:name,static:Humidity\n" \
+		"I:resolution:0.05\n" \
+		"I:parent:L\n" \
+		"J:name:Humidity\n" \
 		"J:type:humidity\n" \
 		"J:mode:source\n" \
 		"J:method:push\n" \
 		"J:base:10\n" \
-		"J:resolution:0.1\n" \
-		"K:name,static:Frequency (10kS)\n" \
+		"J:resolution:0.05\n" \
+		"J:parent:L\n" \
+		"K:name:Random Frequency\n" \
 		"K:type:frequency\n" \
 		"K:mode:source\n" \
 		"K:method:push\n" \
-		"M:name,static:Power\n" \
+		"K:base:10\n" \
+		"L:name:Environment\n" \
+		"L:type:group\n" \
+		"M:name:Power\n" \
 		"M:type:group\n" \
-		"A=1\n" \
-		"B=25\n" \
-		"C=50\n"  \
-		"D=75\n" \
-		"E=0\n" \
-		"F=0\n" \
-		"G=0\n" \
-		"H=0\n" \
-		"I=22.1\n" \
-		"J=65.2\n" \
-		"K=0\n"
+		"N:name:1 MHz\n" \
+		"N:type:frequency\n" \
+		"N:mode:source\n" \
+		"N:method:push\n" \
+		"N:base:10\n" \
+		"N:divider:1\n" \
+		"O:name:Datetime\n" \
+		"O:type:datetime\n" \
+		"O:mode:source\n" \
+		"O:method:push\n" \
+		"A=%u\nB=%x\nC=%x\nD=%x\n"
+
+		// "E=0\n"
+		// "F=0\n"
+		// "G=0\n"
+		// "H=0\n"
+		// "I=22.1\n"
+		// "J=65.2\n"
+		// "K=0\n"
 
 #define MULTIMETER_UDP_PORT     17001
 
@@ -123,6 +137,7 @@ static double I = 0.150;
 
 static int last_client = -1;
 
+unsigned int sw = 0, R = 25, G = 50, B = 75;
 
 int p_init(void)
 {
@@ -266,7 +281,7 @@ int p_recv(int fd)
 		}
 		/* check action */
 		if (strncmp("get config", line, n) == 0) {
-			dprintf(fd, MULTIMETER_TEST_CONFIG, tcp_port);
+			dprintf(fd, MULTIMETER_TEST_CONFIG, tcp_port, sw, R, G, B);
 			last_client = fd;
 		} else if (strncmp("quit", line, n) == 0) {
 			close(fd);
@@ -275,13 +290,17 @@ int p_recv(int fd)
 			if (line[1] != '=') {
 				/* skip invalid sets */
 			} else if (line[0] == 'A') {
-				printf("Switch is now %s\n", line[2] == '0' ? "off" :  "on");
+				sw = line[2] != '0';
+				printf("Switch is now %s\n", sw ? "on" :  "off");
 			} else if (line[0] == 'B') {
-				printf("Red slider to %ld (%s)\n", strtol(line + 2, NULL, 16), line + 2);
+				R = strtol(line + 2, NULL, 16);
+				printf("Red slider to %u (%s)\n", R, line + 2);
 			} else if (line[0] == 'C') {
-				printf("Green slider to %ld (%s)\n", strtol(line + 2, NULL, 16), line + 2);
+				G = strtol(line + 2, NULL, 16);
+				printf("Green slider to %u (%s)\n", R, line + 2);
 			} else if (line[0] == 'D') {
-				printf("Blue slider to %ld (%s)\n", strtol(line + 2, NULL, 16), line + 2);
+				B = strtol(line + 2, NULL, 16);
+				printf("Blue slider to %u (%s)\n", B, line + 2);
 			}
 		}
 	}
@@ -307,19 +326,24 @@ void p_run(void)
 			fprintf(stderr, "select() failed, reason: %s", strerror(errno));
 			break;
 		} else if (err == 0) {
+			static float temperature = -15, humidity = 30;
+			temperature = temperature > 15 ? temperature - 32 : temperature + 0.7512;
+			humidity = humidity > 80 ? humidity - 52 : humidity + 1.498;
 			U += ((double)(rand() % 100) - 50.0) / 10000.0;
 			I += ((double)(rand() % 100) - 50.0) / 10000.0;
 			U = U < 0.0 ? 0.0 : U;
 			I = I < 0.0 ? 0.0 : I;
 			if (last_client > 0) {
-				dprintf(last_client, "E=%04x\nF=%04x\nG=%04x\nH=%lf\nK=%u\n",
-				        (unsigned int)(U * 1000.0),
-				        (unsigned int)(I * 1000.0),
-				        (unsigned int)(U * I * 1000.0),
-				        U / I,
-				        rand() % 1000000
+				dprintf(last_client, "E=%04x\nF=%04x\nG=%04x\nH=%lf\nI=%f\nJ=%f\nK=%u\nN=%u\n",
+				        (unsigned int)(U * 1000.0), /* E */
+				        (unsigned int)(I * 1000.0), /* F */
+				        (unsigned int)(U * I * 1000.0), /* G */
+				        U / I, /* H */
+						temperature, /* I */
+						humidity, /* J */
+				        rand() % 1000000000, /* K */
+				        1000000 /* N */
 				       );
-
 			}
 			printf("U: %.3f, I: %.3f\n", U, I);
 			/* nothing happened, just timeout, continue */

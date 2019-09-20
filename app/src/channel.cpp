@@ -7,10 +7,12 @@ Channel::Channel(QObject *parent, char id) : QObject(parent)
 {
 	m_id = id;
 	m_parent = 0;
-
+	m_plain = false;
+	
 	m_base = 16;
 	m_multiplier = 1;
-	m_resolution = 1;
+	m_resolution = 0;
+	m_divider = 0;
 
 	m_enabled = true;
 
@@ -107,16 +109,8 @@ void Channel::recv(const QString &value)
 	}
 	/* multiply */
 	number *= m_multiplier;
-	/* round up to resolution */
-	number = double(int(number / m_resolution)) * m_resolution;
-	/* cut decimals of the end manually, float value round ups can sometimes add small decimals */
-	int decimals = 0;
-	QString r = QString("%1").arg((m_resolution - double((int(m_resolution)))));
-	if (r.mid(1, 1) == ".") {
-		decimals = r.size() - 2;
-	}
 	/* change value */
-	m_value = QString::number(number, 'f', decimals);
+	m_value = QString::number(number, 'f', 12);
 	emit valueChanged();
 }
 

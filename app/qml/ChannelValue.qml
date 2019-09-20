@@ -30,7 +30,7 @@ Item {
             anchors.bottom: parent.bottom
             anchors.right: unitItem.left
             anchors.rightMargin: main ? 20 : 10
-            text: V.human(modelData.type, modelData.value)
+            text: V.human(modelData)
             color: '#000000'
             font: Qt.font({ pixelSize: main ? 96 : 42, weight: 90 })
         }
@@ -40,8 +40,8 @@ Item {
             anchors.bottom: parent.bottom
             anchors.right: parent.right
             anchors.rightMargin: main ? 20 : 10
-            text: V.unit(modelData.type, modelData.value)
-            visible: V.unit(modelData.type, modelData.value)
+            text: V.unit(modelData)
+            visible: V.unit(modelData)
             color: '#202050'
             font: Qt.font({ pixelSize: main ? 82 : 36, weight: 90 })
         }

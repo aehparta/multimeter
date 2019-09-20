@@ -15,10 +15,12 @@ class Channel : public QObject
 	Q_PROPERTY(QString method MEMBER m_method NOTIFY methodChanged)
 	Q_PROPERTY(char parent READ parentChannel WRITE setParentChannel NOTIFY parentChanged)
 	Q_PROPERTY(QString value READ value WRITE setValue NOTIFY valueChanged)
+	Q_PROPERTY(bool plain MEMBER m_plain NOTIFY plainChanged)
 
 	Q_PROPERTY(unsigned int base MEMBER m_base NOTIFY baseChanged)
 	Q_PROPERTY(double multiplier MEMBER m_multiplier NOTIFY multiplierChanged)
 	Q_PROPERTY(double resolution MEMBER m_resolution NOTIFY resolutionChanged)
+	Q_PROPERTY(double divider MEMBER m_divider NOTIFY dividerChanged)
 
 	Q_PROPERTY(QStringList color MEMBER m_color NOTIFY colorChanged)
 
@@ -54,10 +56,12 @@ signals:
 	void methodChanged();
 	void parentChanged();
 	void valueChanged();
+	void plainChanged();
 
 	void baseChanged();
 	void multiplierChanged();
 	void resolutionChanged();
+	void dividerChanged();
 
 	void colorChanged();
 
@@ -79,6 +83,8 @@ private:
 	QString m_method;
 	char m_parent;
 	QString m_value;
+	/* if value should be rendered as is without any modifications etc */
+	bool m_plain;
 
 	/* number base (default is 16 (hex)) */
 	unsigned int m_base;
@@ -86,6 +92,8 @@ private:
 	double m_multiplier;
 	/* number resolution */
 	double m_resolution;
+	/* constant divider to be used for rendering */
+	double m_divider;
 
 	/* colors for rendering */
 	QStringList m_color;
