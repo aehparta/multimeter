@@ -102,6 +102,12 @@ void Channel::recv(const QString &value)
 			emit valueChanged();
 		}
 		return;
+	} else if (m_type == "datetime" || m_type == "date" || m_type == "time") {
+		if (m_value != value) {
+			m_value = value;
+			emit valueChanged();
+		}
+		return;
 	}
 
 	/* as default parse number */

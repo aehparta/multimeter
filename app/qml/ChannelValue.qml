@@ -18,17 +18,11 @@ Item {
 
     Item {
         anchors.fill: parent
-        visible: {
-            switch (modelData.type) {
-            case 'slider':
-                return false;
-            }
-            return true;
-        }
+        visible: modelData.type != 'slider'
         Text {
             id: valueItem
             anchors.bottom: parent.bottom
-            anchors.right: unitItem.left
+            anchors.right: unitItem.visible ? unitItem.left : parent.right
             anchors.rightMargin: main ? 20 : 10
             text: V.human(modelData)
             color: '#000000'
@@ -50,17 +44,17 @@ Item {
     Item {
     	id: sliderContainer
         anchors.fill: parent
-        anchors.topMargin: main ? 10 : 5
-        anchors.bottomMargin: main ? 10 : 5
-        anchors.leftMargin: main ? 10 : 5
-        anchors.rightMargin: main ? 10 : 5
         visible: modelData.type == 'slider'
+        anchors.bottomMargin: main ? 10 : 3
 
         Slider {
             id: sliderItem
-            value: modelData.value
+            value: isFinite(modelData.value) ? modelData.value : 0;
             anchors.left: parent.left
             anchors.right: parent.right
+	        anchors.leftMargin: main ? 10 : 5
+	        anchors.rightMargin: main ? 10 : 5
+	        height: main ? 64 : 36
             maximumValue: 255
             minimumValue: 0
             stepSize: 1

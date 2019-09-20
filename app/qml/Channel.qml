@@ -4,8 +4,8 @@ import QtQuick.Layouts 1.12
 import QtGraphicalEffects 1.12
 
 Rectangle {
-	width: window.width / parseInt(window.width < 500 ? 1 : window.width / 500) - channelsView.spacing
-	height: contentItem.height + 10
+    width: window.width / parseInt(window.width < 500 ? 1 : window.width / 500) - channelsView.spacing
+    height: contentItem.height + 10
 	color: 'transparent'
 	visible: modelData.enabled
 

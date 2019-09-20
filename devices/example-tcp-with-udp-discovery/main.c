@@ -6,7 +6,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-// #include <ctype.h>
+#include <time.h>
 #include <errno.h>
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -336,15 +336,26 @@ void p_run(void)
 			fprintf(stderr, "select() failed, reason: %s", strerror(errno));
 			break;
 		} else if (err == 0) {
+			/* temperature and humidity */
 			static float temperature = -15, humidity = 30;
 			temperature = temperature > 15 ? temperature - 32 : temperature + 0.7512;
 			humidity = humidity > 80 ? humidity - 52 : humidity + 1.498;
+
+			/* voltage and current */
 			U += ((double)(rand() % 100) - 50.0) / 10000.0;
 			I += ((double)(rand() % 100) - 50.0) / 10000.0;
 			U = U < 0.0 ? 0.0 : U;
 			I = I < 0.0 ? 0.0 : I;
+
+			/* datetime */
+			time_t now;
+			char datetime[128];
+			time(&now);
+			strftime(datetime, sizeof(datetime), "%FT%T", localtime(&now));
+
+			/* send to client */
 			if (last_client > 0) {
-				dprintf(last_client, "E=%04x\nF=%04x\nG=%04x\nH=%lf\nI=%f\nJ=%f\nK=%u\nN=%u\n",
+				dprintf(last_client, "E=%04x\nF=%04x\nG=%04x\nH=%lf\nI=%f\nJ=%f\nK=%u\nN=%u\nO=%s\n",
 				        (unsigned int)(U * 1000.0), /* E */
 				        (unsigned int)(I * 1000.0), /* F */
 				        (unsigned int)(U * I * 1000.0), /* G */
@@ -352,11 +363,12 @@ void p_run(void)
 				        temperature, /* I */
 				        humidity, /* J */
 				        rand() % 1000000000, /* K */
-				        1000000 /* N */
+				        1000000, /* N */
+						datetime /* O */
 				       );
 			}
+
 			printf("U: %.3f, I: %.3f\n", U, I);
-			/* nothing happened, just timeout, continue */
 			continue;
 		}
 

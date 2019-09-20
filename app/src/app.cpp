@@ -12,7 +12,7 @@ int main(int argc, char *argv[])
 	QCoreApplication::setOrganizationName("tldr.fi");
 	QCoreApplication::setOrganizationDomain("tldr.fi");
 	QCoreApplication::setApplicationName("Multimeter");
-	QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+	//QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 
 	QApplication app(argc, argv);
 	QQmlApplicationEngine app_engine;

@@ -24,15 +24,15 @@ Scan::~Scan()
 void Scan::start()
 {
 	/* create and start bluetooth scanner */
-	// if (!m_scanner_bt) {
-	// 	m_scanner_bt = new QBluetoothDeviceDiscoveryAgent(this);
-	// 	connect(m_scanner_bt, SIGNAL(deviceDiscovered(QBluetoothDeviceInfo)),
-	// 	        this, SLOT(btDiscovered(QBluetoothDeviceInfo)));
-	// 	connect(m_scanner_bt, SIGNAL(finished()), this, SLOT(btFinished()));
-	// }
-	// if (!m_scanner_bt->isActive()) {
-	// 	m_scanner_bt->start();
-	// }
+	if (!m_scanner_bt) {
+		m_scanner_bt = new QBluetoothDeviceDiscoveryAgent(this);
+		connect(m_scanner_bt, SIGNAL(deviceDiscovered(QBluetoothDeviceInfo)),
+		        this, SLOT(btDiscovered(QBluetoothDeviceInfo)));
+		connect(m_scanner_bt, SIGNAL(finished()), this, SLOT(btFinished()));
+	}
+	if (!m_scanner_bt->isActive()) {
+		m_scanner_bt->start();
+	}
 
 	/* create and start udp scanner */
 	if (!m_scanner_udp) {

@@ -6,6 +6,8 @@ ScrollView {
 	clip: true
 	ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
 	ScrollBar.vertical.policy: ScrollBar.AlwaysOff
+	wheelEnabled: true
+	contentWidth: window.width
 
 	Flow {
 		id: channelsView
