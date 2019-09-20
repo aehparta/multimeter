@@ -11,7 +11,9 @@ ScrollView {
 		id: channelsView
 		spacing: 5
 		width: window.width
-
+		// height: window.height
+		// flow: Flow.TopToBottom
+		
 		Repeater {
 			id: channelsRepeater
 			model: scan.channels

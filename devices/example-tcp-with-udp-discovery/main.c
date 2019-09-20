@@ -38,19 +38,19 @@ int wifi_init(void);
 		"B:type:slider\n" \
 		"B:mode:sink\n" \
 		"B:method:push\n" \
-		"B:color:000000:ff0000\n" \
+		"B:color:#000000,#ff0000\n" \
 		"B:parent:A\n" \
 		"C:name,static:Slider Green\n" \
 		"C:type:slider\n" \
 		"C:mode:sink\n" \
 		"C:method:push\n" \
-		"C:color:000000:00ff00\n" \
+		"C:color:#000000,#00ff00\n" \
 		"C:parent:A\n" \
 		"D:name,static:Slider Blue\n" \
 		"D:type:slider\n" \
 		"D:mode:sink\n" \
 		"D:method:push\n" \
-		"D:color:000000:0000ff\n" \
+		"D:color:#000000,#0000ff\n" \
 		"D:parent:A\n" \
 		"G:name,static:Wattage\n" \
 		"G:type:wattage\n" \
@@ -58,6 +58,7 @@ int wifi_init(void);
 		"G:method:push\n" \
 		"G:multiplier:0.001\n" \
 		"G:resolution:0.05\n" \
+		"G:parent:M\n" \
 		"E:name,static:Voltage\n" \
 		"E:type:voltage\n" \
 		"E:mode:source\n" \
@@ -78,6 +79,7 @@ int wifi_init(void);
 		"H:method:push\n" \
 		"H:base:10\n" \
 		"H:resolution:5\n" \
+		"H:parent:M\n" \
 		"I:name,static:Temperature\n" \
 		"I:type:temperature\n" \
 		"I:mode:source\n" \
@@ -94,6 +96,8 @@ int wifi_init(void);
 		"K:type:frequency\n" \
 		"K:mode:source\n" \
 		"K:method:push\n" \
+		"M:name,static:Power\n" \
+		"M:type:group\n" \
 		"A=1\n" \
 		"B=25\n" \
 		"C=50\n"  \
@@ -273,11 +277,11 @@ int p_recv(int fd)
 			} else if (line[0] == 'A') {
 				printf("Switch is now %s\n", line[2] == '0' ? "off" :  "on");
 			} else if (line[0] == 'B') {
-				printf("Red slider to %ld\n", strtol(line + 2, NULL, 16));
+				printf("Red slider to %ld (%s)\n", strtol(line + 2, NULL, 16), line + 2);
 			} else if (line[0] == 'C') {
-				printf("Green slider to %ld\n", strtol(line + 2, NULL, 16));
+				printf("Green slider to %ld (%s)\n", strtol(line + 2, NULL, 16), line + 2);
 			} else if (line[0] == 'D') {
-				printf("Blue slider to %ld\n", strtol(line + 2, NULL, 16));
+				printf("Blue slider to %ld (%s)\n", strtol(line + 2, NULL, 16), line + 2);
 			}
 		}
 	}
@@ -308,11 +312,12 @@ void p_run(void)
 			U = U < 0.0 ? 0.0 : U;
 			I = I < 0.0 ? 0.0 : I;
 			if (last_client > 0) {
-				dprintf(last_client, "E=%04x\nF=%04x\nG=%04x\nH=%lf\n",
+				dprintf(last_client, "E=%04x\nF=%04x\nG=%04x\nH=%lf\nK=%u\n",
 				        (unsigned int)(U * 1000.0),
 				        (unsigned int)(I * 1000.0),
 				        (unsigned int)(U * I * 1000.0),
-				        U / I
+				        U / I,
+				        rand() % 1000000
 				       );
 
 			}

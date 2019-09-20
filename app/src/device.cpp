@@ -206,11 +206,14 @@ void Device::recv(const QString &data)
 			connect(channel, SIGNAL(parentChanged()), this, SLOT(channelChanged()));
 			/* connect to children change */
 			connect(channel, SIGNAL(childrenChanged()), this, SLOT(channelChanged()));
+			/* connect to valid change */
+			connect(channel, SIGNAL(validChanged()), this, SLOT(channelChanged()));
 			/* inform that new channel has been added */
 			emit channelsChanged();
 		}
 		/* set value */
 		if (key == "parent") {
+			/* when parent received, need to find parent */
 			char parent_id = value.toStdString().c_str()[0];
 			channel->setParentChannel(parent_id);
 			/* find parent channel, if it already exists, and add this child to it */
@@ -221,7 +224,22 @@ void Device::recv(const QString &data)
 					break;
 				}
 			}
+		} else if (key == "color") {
+			/* color(s) need to be extracted */
+			QStringList list;
+			for (int i = 0; !value.section(',', i, i).isEmpty(); i++) {
+				list.append(value.section(',', i, i));
+			}
+			channel->setProperty("color", list);
+		} else if (key == "type") {
+			channel->setProperty("type", value);
+			/* if type is group, set mode and method automatically to none */
+			if (value == "group") {
+				channel->setProperty("mode", "none");
+				channel->setProperty("method", "none");
+			}
 		} else {
+			/* simplest case, just set property */
 			channel->setProperty(key.toStdString().c_str(), value);
 		}
 		return;

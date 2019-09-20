@@ -4,109 +4,100 @@ import QtQuick.Layouts 1.12
 import QtQuick.Controls 1.4
 import QtQuick.Controls.Styles 1.4
 import QtGraphicalEffects 1.12
+import "/js/value.js" as V
 
-Rectangle {
-	height: value.height
-	color: '#9090e0'
-	visible: {
-		switch (modelData.type) {
-		case 'switch':
-			return false;
-		case 'group':
-			return false;
+Item {
+	property bool main: true
+
+    height: {
+    	if (modelData.type == "slider") {
+			return sliderItem.height + sliderContainer.anchors.topMargin + sliderContainer.anchors.bottomMargin;
 		}
-		return true;
-	}
+		return valueItem.height;
+    }
 
-	Item {
-		anchors.fill: parent
-		visible: {
-			switch (modelData.type) {
-			case 'slider':
-				return false;
-			}
-			return true;
-		}
-		Text {
-			id: value
-			anchors.bottom: parent.bottom
-			anchors.right: unit.left
-			text: modelData.value
-			color: '#000000'
-			font: Qt.font({ pixelSize: 96, weight: 90 })
-		}
+    Item {
+        anchors.fill: parent
+        visible: {
+            switch (modelData.type) {
+            case 'slider':
+                return false;
+            }
+            return true;
+        }
+        Text {
+            id: valueItem
+            anchors.bottom: parent.bottom
+            anchors.right: unitItem.left
+            anchors.rightMargin: main ? 20 : 10
+            text: V.human(modelData.type, modelData.value)
+            color: '#000000'
+            font: Qt.font({ pixelSize: main ? 96 : 42, weight: 90 })
+        }
 
-		Text {
-			id: unit
-			anchors.bottom: parent.bottom
-			anchors.right: parent.right
-			text: {
-				var units = {
-					current: 'A',
-					frequency: 'Hz',
-					humidity: '%',
-					resistance: 'Ω',
-					voltage: 'V',
-					wattage: 'W',
-					/* temperature scales */
-					temperature: '°C',
-					celsius: '°C',
-					kelvin: 'K',
-					fahrenheit: '°F',
-				};
-				return units[modelData.type] !== undefined ? ' ' + units[modelData.type] : '';
-			}
-			color: '#101030'
-			font: Qt.font({ pixelSize: 96, weight: 90 })
-		}
-	}
+        Text {
+            id: unitItem
+            anchors.bottom: parent.bottom
+            anchors.right: parent.right
+            anchors.rightMargin: main ? 20 : 10
+            text: V.unit(modelData.type, modelData.value)
+            visible: V.unit(modelData.type, modelData.value)
+            color: '#202050'
+            font: Qt.font({ pixelSize: main ? 82 : 36, weight: 90 })
+        }
+    }
 
-	Item {
-		anchors.fill: parent
-		visible: modelData.type == 'slider'
+    Item {
+    	id: sliderContainer
+        anchors.fill: parent
+        anchors.topMargin: main ? 10 : 5
+        anchors.bottomMargin: main ? 10 : 5
+        anchors.leftMargin: main ? 10 : 5
+        anchors.rightMargin: main ? 10 : 5
+        visible: modelData.type == 'slider'
 
-		Slider {
-			id: slider
-			value: modelData.value
-			anchors.left: parent.left
-			anchors.right: parent.right
-			anchors.leftMargin: 5
-			anchors.rightMargin: 5
-			maximumValue: 255
-			minimumValue: 0
-			stepSize: 1
+        Slider {
+            id: sliderItem
+            value: modelData.value
+            anchors.left: parent.left
+            anchors.right: parent.right
+            maximumValue: 255
+            minimumValue: 0
+            stepSize: 1
 
-			property color colorStart: '#000000'
-			property color colorEnd: '#000000'
+            property color colorStart: modelData.color[0] ? modelData.color[0] : '#ffffff'
+            property color colorEnd: modelData.color[1] ? modelData.color[1] : sliderItem.colorStart
 
-			onValueChanged: {
-				modelData.value = slider.value;
-			}
+            onValueChanged: {
+                if (modelData.mode != 'sink' || modelData.method != 'push') {
+                    return;
+                }
+                modelData.value = value;
+            }
 
-			style: SliderStyle {
-				groove: Rectangle {
-					implicitHeight: 16
-					layer.enabled: true
-					layer.effect: LinearGradient {
-						end: Qt.point(width, 0)
-						gradient: Gradient {
-							GradientStop { position: 0.0; color: colorStart }
-							GradientStop { position: 1.0; color: colorEnd }
-						}
-					}
-					radius: 8
-				}
-				handle: Rectangle {
-					anchors.centerIn: parent
-					color: control.pressed ? '#000000' : '#000000'
-					border.color: '#000000'
-					border.width: 2
-					implicitWidth: 40
-					implicitHeight: 48
-					radius: 16
-				}
-			}
-		}
-	}
-
+            style: SliderStyle {
+                groove: Rectangle {
+                    implicitHeight: main ? 16 : 12
+                    layer.enabled: true
+                    layer.effect: LinearGradient {
+                        end: Qt.point(width, 0)
+                        gradient: Gradient {
+                            GradientStop { position: 0.0; color: sliderItem.colorStart }
+                            GradientStop { position: 1.0; color: sliderItem.colorEnd }
+                        }
+                    }
+                    radius: 8
+                }
+                handle: Rectangle {
+                    anchors.centerIn: parent
+                    color: control.pressed ? sliderItem.colorEnd : sliderItem.colorEnd
+                    border.color: '#000000'
+                    border.width: 2
+                    implicitWidth: main ? 40 : 28
+                    implicitHeight: main ? 48 : 28
+                    radius: main ? 16 : 8
+                }
+            }
+        }
+    }
 }

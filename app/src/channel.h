@@ -2,6 +2,7 @@
 #define _CHANNEL_H_
 
 #include <QObject>
+#include <QColor>
 #include <QDebug>
 
 class Channel : public QObject
@@ -18,6 +19,8 @@ class Channel : public QObject
 	Q_PROPERTY(unsigned int base MEMBER m_base NOTIFY baseChanged)
 	Q_PROPERTY(double multiplier MEMBER m_multiplier NOTIFY multiplierChanged)
 	Q_PROPERTY(double resolution MEMBER m_resolution NOTIFY resolutionChanged)
+
+	Q_PROPERTY(QStringList color MEMBER m_color NOTIFY colorChanged)
 
 	Q_PROPERTY(bool enabled READ isEnabled WRITE setEnabled NOTIFY enabledChanged)
 
@@ -38,8 +41,8 @@ public:
 	void setValue(QString value);
 
 	bool isValid();
-	void recv(const QString &data);
-	void send(const QString &data);
+	void recv(const QString &value);
+	void send(const QString &value);
 
 	bool isEnabled();
 	void setEnabled(bool value);
@@ -55,6 +58,8 @@ signals:
 	void baseChanged();
 	void multiplierChanged();
 	void resolutionChanged();
+
+	void colorChanged();
 
 	void enabledChanged();
 
@@ -74,12 +79,16 @@ private:
 	QString m_method;
 	char m_parent;
 	QString m_value;
+
 	/* number base (default is 16 (hex)) */
 	unsigned int m_base;
 	/* number multiplier */
 	double m_multiplier;
 	/* number resolution */
 	double m_resolution;
+
+	/* colors for rendering */
+	QStringList m_color;
 
 	/* device enabled */
 	bool m_enabled;

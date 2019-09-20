@@ -5,13 +5,13 @@ import QtGraphicalEffects 1.12
 
 Rectangle {
 	width: window.width / parseInt(window.width < 500 ? 1 : window.width / 500) - channelsView.spacing
-	height: content.height + 10
+	height: contentItem.height + 10
 	color: 'transparent'
 	visible: modelData.enabled
 
 	/* background (borders) */
 	RectangularGlow {
-		anchors.fill: content
+		anchors.fill: contentItem
 		glowRadius: 7
 		spread: 0.05
 		color: '#303070'
@@ -20,7 +20,7 @@ Rectangle {
 
 	/* content */
 	Column {
-		id: content
+		id: contentItem
 		width: parent.width - 10
 		anchors.centerIn: parent
 		clip: true
@@ -31,13 +31,16 @@ Rectangle {
 			width: parent.width
 		}
 
-		ChannelValue {
+		ChannelItem {
 			width: parent.width
 		}
 
 		Repeater {
+			id: childItems
+			property string mainType: modelData.type
 			model: modelData.children
-			delegate: ChannelValue {
+			delegate: ChannelItem {
+				visible: childItems.mainType == 'group' || childItems.mainType == 'switch'
 				width: parent.width
 			}
 		}

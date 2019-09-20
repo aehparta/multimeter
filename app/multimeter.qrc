@@ -3,14 +3,13 @@
         <file>qml/app.qml</file>
         <file>qml/Channel.qml</file>
         <file>qml/ChannelHeader.qml</file>
+        <file>qml/ChannelItem.qml</file>
         <file>qml/Channels.qml</file>
         <file>qml/ChannelValue.qml</file>
         <file>qml/Device.qml</file>
         <file>qml/Devices.qml</file>
 
-        <file>js/app.js</file>
-        <file>js/device.js</file>
-        <file>js/channel.js</file>
+        <file>js/value.js</file>
 
         <file>icons/voltage.png</file>
         <file>icons/current.png</file>

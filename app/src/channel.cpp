@@ -1,4 +1,5 @@
 
+#include <stdlib.h>
 #include "device.h"
 #include "channel.h"
 
@@ -89,17 +90,17 @@ bool Channel::isValid()
 	return !m_name.isEmpty() && !m_type.isEmpty() && !m_mode.isEmpty() && !m_method.isEmpty();
 }
 
-void Channel::recv(const QString &data)
+void Channel::recv(const QString &value)
 {
 	/* as default parse number */
 	double number = 0;
 	bool ok = false;
 	if (m_base == 10) {
 		/* only base 10 can be parsed as floating point */
-		number = data.toDouble(&ok);
+		number = value.toDouble(&ok);
 	} else {
 		/* other bases as long */
-		number = data.toLong(&ok, m_base);
+		number = value.toLong(&ok, m_base);
 	}
 	if (!ok) {
 		return;
@@ -119,10 +120,23 @@ void Channel::recv(const QString &data)
 	emit valueChanged();
 }
 
-void Channel::send(const QString &data)
+void Channel::send(const QString &value)
 {
+	/* as default send as number */
+	bool ok = false;
+	double number = value.toDouble(&ok);
+	if (!ok) {
+		return;
+	}
+	/* divide by multiplier */
+	number /= m_multiplier;
+	/* convert to correct base and send */
 	Device *device = (Device *)parent();
-	device->send(QString(m_id) + "=" + data);
+	if (m_base == 10) {
+		device->send(QString(m_id) + "=" + number);
+	} else {
+		device->send(QString(m_id) + "=" + QString("%1").arg((long)number, 0, m_base));
+	}
 }
 
 bool Channel::isEnabled()
