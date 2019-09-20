@@ -115,7 +115,8 @@ void Device::stop()
 
 void Device::send(const QString &data)
 {
-	QByteArray line;
+	qDebug() << "send" << data << "to device" << m_address << m_port;
+	QByteArray line = "";
 	line.append(data);
 	line.append("\n");
 	if (m_socket_tcp) {

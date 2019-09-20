@@ -116,13 +116,13 @@ int wifi_init(void);
 		"O:method:push\n" \
 		"A=%u\nB=%x\nC=%x\nD=%x\n"
 
-		// "E=0\n"
-		// "F=0\n"
-		// "G=0\n"
-		// "H=0\n"
-		// "I=22.1\n"
-		// "J=65.2\n"
-		// "K=0\n"
+// "E=0\n"
+// "F=0\n"
+// "G=0\n"
+// "H=0\n"
+// "I=22.1\n"
+// "J=65.2\n"
+// "K=0\n"
 
 #define MULTIMETER_UDP_PORT     17001
 
@@ -270,38 +270,48 @@ int p_recv(int fd)
 
 	/* receive data */
 	memset(line, 0, sizeof(line));
-	n = recv(fd, line, sizeof(line), 0);
-	if (n <= 0) {
-		close(fd);
-		FD_CLR(fd, &r_fds);
-	} else {
-		/* we got some data from a client, first trim spaces from end */
-		for (char *p = line + n - 1; p >= line && (*p == ' ' || *p == '\r' || *p == '\n'); p--) {
-			*p = '\0';
-		}
-		/* check action */
-		if (strncmp("get config", line, n) == 0) {
-			dprintf(fd, MULTIMETER_TEST_CONFIG, tcp_port, sw, R, G, B);
-			last_client = fd;
-		} else if (strncmp("quit", line, n) == 0) {
+	while (1) {
+		n = recv(fd, line + strlen(line), 1, 0);
+		if (n <= 0) {
 			close(fd);
 			FD_CLR(fd, &r_fds);
-		} else if (n > 2) {
-			if (line[1] != '=') {
-				/* skip invalid sets */
-			} else if (line[0] == 'A') {
-				sw = line[2] != '0';
-				printf("Switch is now %s\n", sw ? "on" :  "off");
-			} else if (line[0] == 'B') {
-				R = strtol(line + 2, NULL, 16);
-				printf("Red slider to %u (%s)\n", R, line + 2);
-			} else if (line[0] == 'C') {
-				G = strtol(line + 2, NULL, 16);
-				printf("Green slider to %u (%s)\n", R, line + 2);
-			} else if (line[0] == 'D') {
-				B = strtol(line + 2, NULL, 16);
-				printf("Blue slider to %u (%s)\n", B, line + 2);
-			}
+			return 0;
+		}
+		if ((strlen(line) + 1) >= sizeof(line)) {
+			break;
+		}
+		if (line[strlen(line) - 1] == '\n') {
+			break;
+		}
+	}
+	n = strlen(line);
+	
+	/* we got some data from a client, first trim spaces from end */
+	for (char *p = line + n - 1; p >= line && (*p == ' ' || *p == '\r' || *p == '\n'); p--) {
+		*p = '\0';
+	}
+	/* check action */
+	if (strncmp("get config", line, n) == 0) {
+		dprintf(fd, MULTIMETER_TEST_CONFIG, tcp_port, sw, R, G, B);
+		last_client = fd;
+	} else if (strncmp("quit", line, n) == 0) {
+		close(fd);
+		FD_CLR(fd, &r_fds);
+	} else if (n > 2) {
+		if (line[1] != '=') {
+			/* skip invalid sets */
+		} else if (line[0] == 'A') {
+			sw = line[2] != '0';
+			printf("Switch is now %s\n", sw ? "on" :  "off");
+		} else if (line[0] == 'B') {
+			R = strtol(line + 2, NULL, 16);
+			printf("Red slider to %u (%s)\n", R, line + 2);
+		} else if (line[0] == 'C') {
+			G = strtol(line + 2, NULL, 16);
+			printf("Green slider to %u (%s)\n", R, line + 2);
+		} else if (line[0] == 'D') {
+			B = strtol(line + 2, NULL, 16);
+			printf("Blue slider to %u (%s)\n", B, line + 2);
 		}
 	}
 
@@ -339,8 +349,8 @@ void p_run(void)
 				        (unsigned int)(I * 1000.0), /* F */
 				        (unsigned int)(U * I * 1000.0), /* G */
 				        U / I, /* H */
-						temperature, /* I */
-						humidity, /* J */
+				        temperature, /* I */
+				        humidity, /* J */
 				        rand() % 1000000000, /* K */
 				        1000000 /* N */
 				       );

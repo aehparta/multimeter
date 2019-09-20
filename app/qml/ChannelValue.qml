@@ -69,7 +69,7 @@ Item {
             property color colorEnd: modelData.color[1] ? modelData.color[1] : sliderItem.colorStart
 
             onValueChanged: {
-                if (modelData.mode != 'sink' || modelData.method != 'push') {
+                if (modelData.mode != 'sink' || modelData.method != 'push' || modelData.value == value) {
                     return;
                 }
                 modelData.value = value;

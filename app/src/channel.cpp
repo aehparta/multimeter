@@ -8,7 +8,7 @@ Channel::Channel(QObject *parent, char id) : QObject(parent)
 	m_id = id;
 	m_parent = 0;
 	m_plain = false;
-	
+
 	m_base = 16;
 	m_multiplier = 1;
 	m_resolution = 0;
@@ -94,6 +94,16 @@ bool Channel::isValid()
 
 void Channel::recv(const QString &value)
 {
+	/* parse other types than number first */
+	if (m_type == "switch") {
+		QString v = value != "0" ? "1" : "0";
+		if (m_value != v) {
+			m_value = v;
+			emit valueChanged();
+		}
+		return;
+	}
+
 	/* as default parse number */
 	double number = 0;
 	bool ok = false;

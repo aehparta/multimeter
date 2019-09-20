@@ -22,6 +22,7 @@
         <file>icons/slider.png</file>
         <file>icons/temperature.png</file>
         <file>icons/humidity.png</file>
+        <file>icons/group.png</file>
 
         <file>fonts/fa-solid-900.ttf</file>
         <file>fonts/fa-regular-400.ttf</file>
