@@ -2,7 +2,7 @@
 
 ## Prerequisites
 
-- Qt 5.11 and following modules
+- Qt 5.11 with following modules
   - core
   - qml
   - quick
