@@ -13,7 +13,9 @@
 
 Easy install using `apt-get` (works at least in Ubuntu 19.04 and Rasbian Buster):
 ```sh
-apt-get install qt5-default qtdeclarative5-dev qtconnectivity5-dev
+apt-get install qt5-default qtdeclarative5-dev qtconnectivity5-dev \
+    qml-module-qtquick2 qml-module-qtquick-controls2 \
+    qml-module-qtquick-controls qml-module-qt-labs-settings qml-module-qtgraphicaleffects
 ```
 
 ### Windows and macOS
