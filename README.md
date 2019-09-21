@@ -1,8 +1,13 @@
-# multimeter
+# Compile
 
 ## Prerequisites
 
-Required Qt 5 modules: core qml quick widgets bluetooth
+- Qt 5.11
+  - core
+  - qml
+  - quick
+  - widgets
+  - bluetooth
 
 Easy install using `apt-get` (works at least in Ubuntu 19.04 and Rasbian Buster):
 ```sh
