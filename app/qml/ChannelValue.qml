@@ -26,7 +26,7 @@ Item {
             anchors.rightMargin: main ? 20 : 10
             text: V.human(modelData)
             color: '#000000'
-            font: Qt.font({ pixelSize: main ? 96 : 42, weight: 90 })
+            font: Qt.font({ pixelSize: main ? 80 : 42, weight: 90 })
         }
 
         Text {
@@ -37,7 +37,7 @@ Item {
             text: V.unit(modelData)
             visible: V.unit(modelData)
             color: '#202050'
-            font: Qt.font({ pixelSize: main ? 82 : 36, weight: 90 })
+            font: Qt.font({ pixelSize: main ? 72 : 36, weight: 90 })
         }
     }
 
