@@ -3,7 +3,7 @@ import QtQuick 2.11
 import QtQuick.Layouts 1.11
 import QtQuick.Controls 1.4
 import QtQuick.Controls.Styles 1.4
-import QtGraphicalEffects 1.11
+import QtGraphicalEffects 1.0
 import "/js/value.js" as V
 
 Item {
