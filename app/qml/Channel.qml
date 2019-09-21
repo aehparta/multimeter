@@ -1,7 +1,7 @@
 
-import QtQuick 2.12
-import QtQuick.Layouts 1.12
-import QtGraphicalEffects 1.12
+import QtQuick 2.11
+import QtQuick.Layouts 1.11
+import QtGraphicalEffects 1.11
 
 Rectangle {
     width: window.width / parseInt(window.width < 500 ? 1 : window.width / 500) - channelsView.spacing
