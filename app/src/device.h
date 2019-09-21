@@ -44,7 +44,9 @@ signals:
 
 private slots:
 	void connectionReady();
-	void connectionError(QBluetoothSocket::SocketError error);
+	void btConnectionError(QBluetoothSocket::SocketError);
+	void tcpConnectionError(QAbstractSocket::SocketError);
+	void socketDisconnected();
 	void readReady();
 	void channelChanged();
 	void getConfig();
@@ -66,7 +68,7 @@ private:
 	/* channels */
 	QMap<char, QObject *> m_channels;
 
-	/* config not-received timer */
+	/* main timer to be used in different states */
 	QTimer timer;
 
 	/* receive data */

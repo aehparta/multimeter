@@ -13,9 +13,6 @@ Device::Device(QObject *parent, bool enabled, QString address, int port)
 	m_socket_tcp = NULL;
 	m_socket_bt = NULL;
 
-	timer.setSingleShot(false);
-	connect(&timer, SIGNAL(timeout()), this, SLOT(getConfig()));
-
 	qDebug() << "new device" << id() << m_channels.size();
 }
 
@@ -92,13 +89,16 @@ void Device::start()
 	}
 	if (m_port < 0) {
 		m_socket_bt = new QBluetoothSocket(QBluetoothServiceInfo::RfcommProtocol);
-		connect(m_socket_bt, SIGNAL(error(QBluetoothSocket::SocketError)), this, SLOT(connectionError(QBluetoothSocket::SocketError)));
+		connect(m_socket_bt, SIGNAL(error(QBluetoothSocket::SocketError)), this, SLOT(btConnectionError(QBluetoothSocket::SocketError)));
+		connect(m_socket_bt, SIGNAL(disconnected()), this, SLOT(socketDisconnected()));
 		connect(m_socket_bt, SIGNAL(connected()), this, SLOT(connectionReady()));
 		connect(m_socket_bt, SIGNAL(readyRead()), this, SLOT(readReady()));
 		m_socket_bt->connectToService(QBluetoothAddress(m_address), QBluetoothUuid(QStringLiteral("00001101-0000-1000-8000-00805F9B34FB")));
 		qDebug() << m_address << "bluetooth: trying to connect";
 	} else {
 		m_socket_tcp = new QTcpSocket(this);
+		connect(m_socket_bt, SIGNAL(error(QAbstractSocket::SocketError)), this, SLOT(tcpConnectionError(QAbstractSocket::SocketError)));
+		connect(m_socket_bt, SIGNAL(disconnected()), this, SLOT(socketDisconnected()));
 		connect(m_socket_tcp, SIGNAL(connected()), this, SLOT(connectionReady()));
 		connect(m_socket_tcp, SIGNAL(readyRead()), this, SLOT(readReady()));
 		m_socket_tcp->connectToHost(m_address, m_port);
@@ -143,6 +143,14 @@ QList<QObject *> Device::channels()
 
 void Device::recv(const QString &data)
 {
+	/* setup timer to check for diconnect */
+	timer.stop();
+	disconnect(&timer, NULL, NULL, NULL);
+	connect(&timer, SIGNAL(timeout()), this, SLOT(socketDisconnected()));
+	timer.setInterval(10000);
+	timer.setSingleShot(true);
+	timer.start();
+
 	/* check if this is a device property line */
 	if (data.section(':', 0, 0) == "device") {
 		/* extract value */
@@ -187,8 +195,6 @@ void Device::recv(const QString &data)
 
 	/* check if this is a configuration line */
 	if (data.at(1) == ':') {
-		/* remove get config timer */
-		timer.stop();
 		/* extract value */
 		QString value = data.section(':', 2);
 		/* extract full key description */
@@ -264,14 +270,31 @@ void Device::connectionReady()
 	/* inform that we are now connected */
 	emit connected();
 	/* start timer to secure we receive config */
+	timer.stop();
+	disconnect(&timer, NULL, NULL, NULL);
+	connect(&timer, SIGNAL(timeout()), this, SLOT(getConfig()));
 	timer.setInterval(100);
 	timer.start();
 }
 
-void Device::connectionError(QBluetoothSocket::SocketError)
+void Device::btConnectionError(QBluetoothSocket::SocketError)
 {
+	qDebug() << m_address << "bluetooth error occured" << m_socket_bt->errorString();
 	stop();
 	emit error();
+}
+
+void Device::tcpConnectionError(QAbstractSocket::SocketError)
+{
+	qDebug() << m_address << m_port << "tcp error occured" << m_socket_tcp->errorString();
+	stop();
+	emit error();
+}
+
+void Device::socketDisconnected()
+{
+	qDebug() << m_address << m_port << "device disconnected";
+	stop();
 }
 
 void Device::readReady()
@@ -315,5 +338,6 @@ void Device::getConfig()
 	/* send config request to device */
 	send("get config");
 	timer.setInterval(1000);
+	timer.setSingleShot(false);
 	qDebug() << m_address << m_port << "config request sent";
 }

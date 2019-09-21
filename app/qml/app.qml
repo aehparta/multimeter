@@ -58,8 +58,8 @@ ApplicationWindow {
 					id: navScanButton
 					Layout.rightMargin: 20
 
-					text: '\uf021'
-					color: scan.active ? '#303070' : '#000000'
+					text: '\uf2f1'
+					color: scan.active ? '#202050' : '#000000'
 					font: Qt.font({ pixelSize: 36, weight: 80, family: 'Font Awesome 5 Free' })
 
 					MouseArea {
