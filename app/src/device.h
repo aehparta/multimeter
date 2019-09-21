@@ -46,7 +46,6 @@ private slots:
 	void connectionReady();
 	void btConnectionError(QBluetoothSocket::SocketError);
 	void tcpConnectionError(QAbstractSocket::SocketError);
-	void socketDisconnected();
 	void readReady();
 	void channelChanged();
 	void getConfig();

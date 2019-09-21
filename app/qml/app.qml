@@ -14,10 +14,6 @@ ApplicationWindow {
 	height: 480
 	color: '#171743'
 
-	Devices {
-		id: devicesView
-	}
-
 	ColumnLayout {
 		anchors.fill: parent
 
@@ -30,28 +26,47 @@ ApplicationWindow {
 				anchors.fill: parent
 
 				Label {
-					Layout.leftMargin: 20
-
-					text: '\uf054'
-					color: '#000000'
-					font: Qt.font({ pixelSize: 36, weight: 80, family: 'Font Awesome 5 Free' })
-
-					MouseArea {
-						anchors.fill: parent
-						onClicked: devicesView.open()
-					}
-				}
-
-				Label {
 					id: navLabel
 					clip: true
 					Layout.fillWidth: true
 					Layout.leftMargin: 20
 					Layout.rightMargin: 20
 
-					text: 'All devices'
+					text: 'Devices'
 					color: '#202040'
 					font: Qt.font({ pixelSize: 36, weight: 80 })
+				}
+
+				Label {
+					id: navChannelsButton
+					Layout.rightMargin: 20
+
+					text: '\uf233'
+					color: '#000000'
+					font: Qt.font({ pixelSize: 36, weight: 80, family: 'Font Awesome 5 Free' })
+
+					MouseArea {
+						anchors.fill: parent
+						onClicked: {
+							navLabel.text = 'Channels'
+						}
+					}
+				}
+
+				Label {
+					id: navDevicesButton
+					Layout.rightMargin: 20
+
+					text: '\uf2db'
+					color: '#000000'
+					font: Qt.font({ pixelSize: 36, weight: 80, family: 'Font Awesome 5 Free' })
+
+					MouseArea {
+						anchors.fill: parent
+						onClicked: {
+							navLabel.text = 'Devices'
+						}
+					}
 				}
 
 				Label {
@@ -107,42 +122,36 @@ ApplicationWindow {
 			height: 0
 		}
 
-		/* content */
-		StackView {
-			id: contentView
-			initialItem: channelsView
+		ScrollView {
+			clip: true
 			Layout.fillWidth: true
 			Layout.fillHeight: true
-		}
-
-		/* channels view */
-		Component {
-			id: channelsView
-			Channels {
+			ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
+			ScrollBar.vertical.policy: ScrollBar.AlwaysOff
+			wheelEnabled: true
+			contentWidth: window.width
+			contentHeight: {
+				switch (navLabel.text) {
+				case 'Channels':
+					return channelsView.height;
+				case 'Devices':
+					return devicesView.height
+				}
+				return 0;
 			}
-		}
 
-		/* date and time picker */
-		Component {
-			id: datetimePickerView
-			ColumnLayout {
-				Layout.fillWidth: true
-				Layout.fillHeight: true
-				Calendar {
-					frameVisible: false
-					Layout.fillWidth: true
-					Layout.fillHeight: true
-					Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
-				}
-				RowLayout {
-					Layout.fillWidth: true
-					Tumbler {
-						model: 24
-					}
-					Tumbler {
-						model: 60
-					}
-				}
+			/* channels view */
+			Channels {
+				id: channelsView
+				width: parent.width
+				visible: navLabel.text == 'Channels'
+			}
+
+			/* devices view */
+			Devices {
+				id: devicesView
+				width: parent.width
+				visible: navLabel.text == 'Devices'
 			}
 		}
 	}
