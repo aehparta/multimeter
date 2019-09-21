@@ -1,15 +1,17 @@
 
 import QtQuick 2.12
 import QtQuick.Controls 1.4
-import QtQuick.Controls 2.12
-import QtQuick.Layouts 1.12
+import QtQuick.Controls 2.11
+import QtQuick.Layouts 1.11
+import QtQuick.Window 2.11
+import Qt.labs.settings 1.0
 import "."
 
 ApplicationWindow {
 	id: window
 	visible: true
-	width: 1280
-	height: 800
+	width: 640
+	height: 480
 	color: '#171743'
 
 	Devices {
@@ -52,18 +54,50 @@ ApplicationWindow {
 					font: Qt.font({ pixelSize: 36, weight: 80 })
 				}
 
-				Text {
-					id: navMenuButton
-					Layout.rightMargin: navLabel.Layout.leftMargin
+				Label {
+					id: navScanButton
+					Layout.rightMargin: 20
 
-					text: '☰'
-					font: navLabel.font
+					text: '\uf021'
+					color: scan.active ? '#303070' : '#000000'
+					font: Qt.font({ pixelSize: 36, weight: 80, family: 'Font Awesome 5 Free' })
 
 					MouseArea {
 						anchors.fill: parent
-						onClicked: contentView.push(datetimePickerView)
+						onClicked: {
+							if (!scan.active) {
+								scan.autostart = true;
+								scan.start();
+							}
+						}
+					}
+
+					RotationAnimator {
+						target: navScanButton
+						from: 0;
+						to: 360;
+						duration: 1000
+						running: scan.active
+						loops: Animation.Infinite
 					}
 				}
+
+				Label {
+					id: navFullscreenButton
+					Layout.rightMargin: 20
+
+					text: '\uf065'
+					color: '#000000'
+					font: Qt.font({ pixelSize: 36, weight: 80, family: 'Font Awesome 5 Free' })
+
+					MouseArea {
+						anchors.fill: parent
+						onClicked: {
+							window.visibility = window.visibility == Window.FullScreen ? Window.AutomaticVisibility : Window.FullScreen;
+						}
+					}
+				}
+
 			}
 		}
 
@@ -113,8 +147,38 @@ ApplicationWindow {
 		}
 	}
 
+	/* fullscreen off when escape is pressed */
+	Item {
+		focus: true
+		Keys.onEscapePressed: {
+			window.visibility = Window.AutomaticVisibility;
+		}
+	}
+
+	Settings {
+		id: settings
+	}
+
 	Component.onCompleted: {
-		scan.autostart = true;
-		scan.start()
+		if (settings.value("window/width") > 0) {
+			window.width = settings.value("window/width");
+			window.height = settings.value("window/height");
+			window.x = settings.value("window/x");
+			window.y = settings.value("window/y");
+		}
+		window.visibility = fullscreen ? Window.FullScreen : Window.AutomaticVisibility
+
+		/* start scanner */
+		// scan.autostart = true;
+		// scan.start();
+	}
+
+	Component.onDestruction: {
+		if (window.visibility != Window.FullScreen) {
+			settings.setValue('window/width', window.width);
+			settings.setValue('window/height', window.height);
+			settings.setValue('window/x', window.x);
+			settings.setValue('window/y', window.y);
+		}
 	}
 }

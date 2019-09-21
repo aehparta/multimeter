@@ -11,7 +11,9 @@
 class Scan : public QObject
 {
 	Q_OBJECT
-	Q_PROPERTY(bool active READ isActive NOTIFY changedActive)
+	Q_PROPERTY(bool btEnabled MEMBER m_scanner_bt_enabled WRITE btEnable NOTIFY btEnabledChanged)
+	Q_PROPERTY(bool udpEnabled MEMBER m_scanner_udp_enabled WRITE udpEnable NOTIFY udpEnabledChanged)
+	Q_PROPERTY(bool active READ isActive NOTIFY activeChanged)
 	Q_PROPERTY(bool autostart MEMBER m_autostart NOTIFY autostartChanged)
 	Q_PROPERTY(QList<QObject *> channels READ channels NOTIFY channelsChanged)
 	Q_PROPERTY(QList<QObject *> devices READ devices NOTIFY devicesChanged)
@@ -22,15 +24,21 @@ public:
 	Scan(QObject *parent = NULL);
 	~Scan();
 
+	void btEnable(bool value);
+	void udpEnable(bool value);
+
 	Q_INVOKABLE void start();
 	bool isActive();
 	QList<QObject *> channels();
 	QList<QObject *> devices();
 
 signals:
+	void btEnabledChanged();
+	void udpEnabledChanged();
+
 	void started();
 	void finished();
-	void changedActive();
+	void activeChanged();
 	void discovered(Device *device);
 	void autostartChanged();
 	void channelsChanged();
@@ -39,6 +47,7 @@ signals:
 private slots:
 	void btDiscovered(const QBluetoothDeviceInfo &);
 	void btFinished();
+	void udpFinished();
 	void udpHasData();
 	void deviceChannelsChanged();
 
@@ -47,8 +56,11 @@ protected:
 private:
 	/* bluetooth scanner */
 	QBluetoothDeviceDiscoveryAgent *m_scanner_bt;
+	bool m_scanner_bt_enabled;
 	/* udp scanner */
 	QUdpSocket *m_scanner_udp;
+	bool m_scanner_udp_enabled;
+	QTimer m_scanner_udp_timer;
 	/* autostart discovered devices */
 	bool m_autostart;
 	/* list of devices found */

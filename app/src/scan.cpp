@@ -1,11 +1,18 @@
 
 #include "scan.h"
 
-Scan::Scan(QObject *parent) : QObject(parent)
+Scan::Scan(QObject *parent)
+	: QObject(parent), m_scanner_udp_timer(this)
 {
 	m_scanner_bt = NULL;
+	m_scanner_bt_enabled = true;
 	m_scanner_udp = NULL;
+	m_scanner_udp_enabled = true;
 	m_autostart = true;
+
+	m_scanner_udp_timer.setInterval(5000);
+	m_scanner_udp_timer.setSingleShot(true);
+	connect(&m_scanner_udp_timer, SIGNAL(timeout()), this, SLOT(udpFinished()));
 
 	/* preload saved devices */
 	QSettings settings;
@@ -21,29 +28,50 @@ Scan::~Scan()
 {
 }
 
+void Scan::btEnable(bool value)
+{
+	if (m_scanner_bt_enabled != value) {
+		m_scanner_bt_enabled = value;
+		emit btEnabledChanged();
+	}
+}
+
+void Scan::udpEnable(bool value)
+{
+	if (m_scanner_udp_enabled != value) {
+		m_scanner_udp_enabled = value;
+		emit udpEnabledChanged();
+	}
+}
+
 void Scan::start()
 {
 	/* create and start bluetooth scanner */
-	if (!m_scanner_bt) {
-		m_scanner_bt = new QBluetoothDeviceDiscoveryAgent(this);
-		connect(m_scanner_bt, SIGNAL(deviceDiscovered(QBluetoothDeviceInfo)),
-		        this, SLOT(btDiscovered(QBluetoothDeviceInfo)));
-		connect(m_scanner_bt, SIGNAL(finished()), this, SLOT(btFinished()));
-	}
-	if (!m_scanner_bt->isActive()) {
-		m_scanner_bt->start();
+	if (m_scanner_bt_enabled) {
+		if (!m_scanner_bt) {
+			m_scanner_bt = new QBluetoothDeviceDiscoveryAgent(this);
+			connect(m_scanner_bt, SIGNAL(deviceDiscovered(QBluetoothDeviceInfo)),
+			        this, SLOT(btDiscovered(QBluetoothDeviceInfo)));
+			connect(m_scanner_bt, SIGNAL(finished()), this, SLOT(btFinished()));
+		}
+		if (!m_scanner_bt->isActive()) {
+			m_scanner_bt->start();
+		}
 	}
 
 	/* create and start udp scanner */
-	if (!m_scanner_udp) {
-		m_scanner_udp = new QUdpSocket(this);
-		m_scanner_udp->bind(BCAST_PORT, QUdpSocket::ShareAddress);
-		connect(m_scanner_udp, SIGNAL(readyRead()), this, SLOT(udpHasData()));
+	if (m_scanner_udp_enabled) {
+		if (!m_scanner_udp) {
+			m_scanner_udp = new QUdpSocket(this);
+			m_scanner_udp->bind(BCAST_PORT, QUdpSocket::ShareAddress);
+			connect(m_scanner_udp, SIGNAL(readyRead()), this, SLOT(udpHasData()));
+		}
+		m_scanner_udp->writeDatagram("scan", 4, QHostAddress::Broadcast, BCAST_PORT);
+		m_scanner_udp_timer.start();
 	}
-	m_scanner_udp->writeDatagram("scan", 4, QHostAddress::Broadcast, BCAST_PORT);
 
 	emit started();
-	emit changedActive();
+	emit activeChanged();
 }
 
 bool Scan::isActive()
@@ -88,7 +116,16 @@ void Scan::btDiscovered(const QBluetoothDeviceInfo &dev)
 void Scan::btFinished()
 {
 	emit finished();
-	emit changedActive();
+	emit activeChanged();
+}
+
+void Scan::udpFinished()
+{
+	m_scanner_udp->close();
+	delete m_scanner_udp;
+	m_scanner_udp = NULL;
+	emit finished();
+	emit activeChanged();
 }
 
 void Scan::udpHasData()

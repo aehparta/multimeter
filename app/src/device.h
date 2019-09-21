@@ -3,6 +3,7 @@
 
 #include <QTcpSocket>
 #include <QBluetoothSocket>
+#include <QTimer>
 #include <QSettings>
 #include <QCryptographicHash>
 #include <QHostAddress>
@@ -46,6 +47,7 @@ private slots:
 	void connectionError(QBluetoothSocket::SocketError error);
 	void readReady();
 	void channelChanged();
+	void getConfig();
 	
 private:
 	/* device name, if given */
@@ -63,6 +65,9 @@ private:
 	int m_port;
 	/* channels */
 	QMap<char, QObject *> m_channels;
+
+	/* config not-received timer */
+	QTimer timer;
 
 	/* receive data */
 	void recv(const QString &data);

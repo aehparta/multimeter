@@ -1,7 +1,8 @@
 
 #include "device.h"
 
-Device::Device(QObject *parent, bool enabled, QString address, int port) : QObject(parent)
+Device::Device(QObject *parent, bool enabled, QString address, int port)
+	: QObject(parent), timer(this)
 {
 	m_address = address;
 	m_port = port;
@@ -11,6 +12,9 @@ Device::Device(QObject *parent, bool enabled, QString address, int port) : QObje
 
 	m_socket_tcp = NULL;
 	m_socket_bt = NULL;
+
+	timer.setSingleShot(false);
+	connect(&timer, SIGNAL(timeout()), this, SLOT(getConfig()));
 
 	qDebug() << "new device" << id() << m_channels.size();
 }
@@ -32,6 +36,9 @@ Device::Device(QObject *parent, QString settings_group) : QObject(parent)
 
 	m_socket_tcp = NULL;
 	m_socket_bt = NULL;
+
+	timer.setSingleShot(false);
+	connect(&timer, SIGNAL(timeout()), this, SLOT(getConfig()));
 
 	qDebug() << "new device from config" << id() << m_channels.size();
 }
@@ -89,11 +96,13 @@ void Device::start()
 		connect(m_socket_bt, SIGNAL(connected()), this, SLOT(connectionReady()));
 		connect(m_socket_bt, SIGNAL(readyRead()), this, SLOT(readReady()));
 		m_socket_bt->connectToService(QBluetoothAddress(m_address), QBluetoothUuid(QStringLiteral("00001101-0000-1000-8000-00805F9B34FB")));
+		qDebug() << m_address << "bluetooth: trying to connect";
 	} else {
 		m_socket_tcp = new QTcpSocket(this);
 		connect(m_socket_tcp, SIGNAL(connected()), this, SLOT(connectionReady()));
 		connect(m_socket_tcp, SIGNAL(readyRead()), this, SLOT(readReady()));
 		m_socket_tcp->connectToHost(m_address, m_port);
+		qDebug() << m_address << m_port << "tcp: trying to connect";
 	}
 }
 
@@ -178,6 +187,8 @@ void Device::recv(const QString &data)
 
 	/* check if this is a configuration line */
 	if (data.at(1) == ':') {
+		/* remove get config timer */
+		timer.stop();
 		/* extract value */
 		QString value = data.section(':', 2);
 		/* extract full key description */
@@ -249,10 +260,12 @@ void Device::recv(const QString &data)
 
 void Device::connectionReady()
 {
-	/* send config request to device */
-	send("get config");
+	qDebug() << m_address << m_port << "connection established, requesting config";
 	/* inform that we are now connected */
 	emit connected();
+	/* start timer to secure we receive config */
+	timer.setInterval(100);
+	timer.start();
 }
 
 void Device::connectionError(QBluetoothSocket::SocketError)
@@ -295,4 +308,12 @@ void Device::readReady()
 void Device::channelChanged()
 {
 	emit channelsChanged();
+}
+
+void Device::getConfig()
+{
+	/* send config request to device */
+	send("get config");
+	timer.setInterval(1000);
+	qDebug() << m_address << m_port << "config request sent";
 }

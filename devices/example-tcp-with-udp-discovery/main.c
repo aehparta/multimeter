@@ -264,6 +264,7 @@ int p_recv(int fd)
 			addr.sin_port = htons(MULTIMETER_UDP_PORT);
 			sprintf(line, "tcp:%d", tcp_port);
 			sendto(udp_fd, line, strlen(line), 0, (struct sockaddr *)&addr, sizeof(addr));
+			printf("discovery request replied\n");
 		}
 		return 0;
 	}
