@@ -166,28 +166,13 @@ ApplicationWindow {
 
 	Settings {
 		id: settings
+		property alias x: window.x
+		property alias y: window.y
+		property alias width: window.width
+		property alias height: window.height
 	}
 
 	Component.onCompleted: {
-		if (settings.value("window/width") > 0) {
-			window.width = settings.value("window/width");
-			window.height = settings.value("window/height");
-			window.x = settings.value("window/x");
-			window.y = settings.value("window/y");
-		}
 		window.visibility = fullscreen ? Window.FullScreen : Window.AutomaticVisibility
-
-		/* start scanner */
-		// scan.autostart = true;
-		// scan.start();
-	}
-
-	Component.onDestruction: {
-		if (window.visibility != Window.FullScreen) {
-			settings.setValue('window/width', window.width);
-			settings.setValue('window/height', window.height);
-			settings.setValue('window/x', window.x);
-			settings.setValue('window/y', window.y);
-		}
 	}
 }
