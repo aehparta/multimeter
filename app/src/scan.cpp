@@ -110,7 +110,7 @@ QList<QObject *> Scan::devices()
 
 void Scan::btDiscovered(const QBluetoothDeviceInfo &dev)
 {
-	addDevice(dev.address().toString());
+	addDevice(dev.address().toString(), -1, dev.name());
 }
 
 void Scan::btFinished()
@@ -141,7 +141,7 @@ void Scan::udpHasData()
 			if (ok) {
 				address.setAddress(ipv4);
 			}
-			addDevice(address.toString(), data.mid(4).toInt());
+			addDevice(address.toString(), data.mid(4).toInt(), "");
 		}
 	}
 }
@@ -167,9 +167,9 @@ void Scan::deviceChannelsChanged()
 	}
 }
 
-bool Scan::addDevice(const QString &address, int port)
+bool Scan::addDevice(const QString &address, int port, QString name)
 {
-	return addDevice(new Device(this, true, address, port));
+	return addDevice(new Device(this, port < 1 ? false : true, address, port, name));
 }
 
 bool Scan::addDevice(Device *device)

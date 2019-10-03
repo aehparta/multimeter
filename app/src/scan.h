@@ -67,7 +67,7 @@ private:
 	QList<QObject *> m_devices;
 
 	/* add new device */
-	bool addDevice(const QString &address, int port = -1);
+	bool addDevice(const QString &address, int port, QString name);
 	bool addDevice(Device *device);
 };
 
