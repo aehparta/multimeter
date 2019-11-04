@@ -1,13 +1,13 @@
 
 #include "device.h"
 
-Device::Device(QObject *parent, bool enabled, QString address, int port)
+Device::Device(QObject *parent, bool enabled, QString address, int port, QString name)
 	: QObject(parent), timer(this)
 {
 	m_address = address;
 	m_port = port;
 
-	m_name = id();
+	m_name = name.isEmpty() ? id() : name;
 	m_enabled = enabled;
 
 	m_socket_tcp = NULL;
@@ -84,7 +84,7 @@ int Device::port()
 
 void Device::start()
 {
-	if (m_socket_bt || m_socket_tcp) {
+	if (!m_enabled || m_socket_bt || m_socket_tcp) {
 		return;
 	}
 	if (m_port < 0) {
@@ -188,6 +188,7 @@ void Device::recv(const QString &data)
 
 	/* check if this is a configuration line */
 	if (data.at(1) == ':') {
+		qDebug() << data;
 		/* extract value */
 		QString value = data.section(':', 2);
 		/* extract full key description */
@@ -305,16 +306,28 @@ void Device::readReady()
 		}
 	}
 	if (m_socket_bt) {
-		/* bluetooth socket */
-		while (m_socket_bt->canReadLine()) {
-			QByteArray line = m_socket_bt->readLine();
-			qDebug() << line;
-			QString data;
-			data.append(line);
-			data = data.trimmed();
-			if (!data.isEmpty()) {
-				recv(data);
-				emit receive(data);
+		static QString line = "";
+		/* for some odd reason bluetooth socket had problem
+		 * properly using canReadLine() so this more low level
+		 * approach is here because of that
+		 */
+		while (true) {
+			char c;
+			if (m_socket_bt->read(&c, 1) < 1) {
+				break;
+			}
+			if (c == '\r') {
+				continue;
+			}
+			if (c == '\n') {
+				line = line.trimmed();
+				if (!line.isEmpty()) {
+					recv(line);
+					emit receive(line);
+				}
+				line = "";
+			} else {
+				line.append(c);
 			}
 		}
 	}
