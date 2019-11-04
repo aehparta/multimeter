@@ -32,7 +32,7 @@ ApplicationWindow {
 					Layout.leftMargin: 20
 					Layout.rightMargin: 20
 
-					text: 'Devices'
+					text: scan.devices.length > 0 ? 'Channels' : 'Devices'
 					color: '#202040'
 					font: Qt.font({ pixelSize: 36, weight: 80 })
 				}

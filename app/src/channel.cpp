@@ -187,7 +187,7 @@ void Channel::deviceEnabled()
 
 void Channel::pull()
 {
-	qDebug() << "pull";
+	// qDebug() << "pull";
 
 	Device *device = (Device *)parent();
 	device->send(QString(m_id));
