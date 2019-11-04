@@ -142,6 +142,8 @@ QList<QObject *> Device::channels()
 
 void Device::recv(const QString &data)
 {
+	qDebug() << data;
+
 	/* check if this is a device property line */
 	if (data.section(':', 0, 0) == "device") {
 		/* extract value */
@@ -200,6 +202,8 @@ void Device::recv(const QString &data)
 		QStringList options = key.split(',', QString::SkipEmptyParts);
 		key = options.takeFirst();
 		/* TODO: handle options */
+
+		qDebug() << key;
 
 		/* create new channel into list if it does not yet exist */
 		Channel *channel = m_channels.contains(channel_id) ? (Channel *)m_channels[channel_id] : NULL;
@@ -304,6 +308,7 @@ void Device::readReady()
 		/* bluetooth socket */
 		while (m_socket_bt->canReadLine()) {
 			QByteArray line = m_socket_bt->readLine();
+			qDebug() << line;
 			QString data;
 			data.append(line);
 			data = data.trimmed();

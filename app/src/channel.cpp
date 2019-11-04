@@ -3,7 +3,8 @@
 #include "device.h"
 #include "channel.h"
 
-Channel::Channel(QObject *parent, char id) : QObject(parent)
+Channel::Channel(QObject *parent, char id)
+	: QObject(parent), m_timer(this)
 {
 	m_id = id;
 	m_parent = 0;
@@ -164,13 +165,32 @@ void Channel::setEnabled(bool value)
 
 void Channel::checkValid()
 {
+	qDebug() << "valid" << m_name << m_type << m_mode << m_method << m_wasValid << isValid();
 	if (isValid() != m_wasValid) {
 		m_wasValid = isValid();
 		emit validChanged();
+
+		/* setup pull if channel value must be pulled */
+		if (m_type == "datetime") {
+			connect(&m_timer, SIGNAL(timeout()), this, SLOT(pull()));
+			m_timer.setInterval(10);
+			m_timer.setSingleShot(false);
+			m_timer.start();
+		}
 	}
 }
 
 void Channel::deviceEnabled()
 {
 	emit enabledChanged();
+}
+
+void Channel::pull()
+{
+	qDebug() << "pull";
+
+	Device *device = (Device *)parent();
+	device->send(QString(m_id));
+
+	m_timer.setInterval(1000);
 }

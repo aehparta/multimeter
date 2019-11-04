@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QColor>
 #include <QDebug>
+#include <QTimer>
 
 class Channel : public QObject
 {
@@ -73,6 +74,7 @@ signals:
 private slots:
 	void checkValid();
 	void deviceEnabled();
+	void pull();
 
 private:
 	/* basic properties */
@@ -104,6 +106,7 @@ private:
 	/* internals */
 	bool m_wasValid;
 	QList<QObject *> m_children;
+	QTimer m_timer;
 
 };
 
