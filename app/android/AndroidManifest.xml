@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<manifest package="fi.tldr.multimeter" xmlns:android="http://schemas.android.com/apk/res/android" android:versionName="2.0.0" android:versionCode="200" android:installLocation="auto">
+<manifest package="fi.tldr.multimeter" xmlns:android="http://schemas.android.com/apk/res/android" android:versionName="2.2.0" android:versionCode="220" android:installLocation="auto">
     <application android:hardwareAccelerated="true" android:name="org.qtproject.qt5.android.bindings.QtApplication" android:label="Multimeter" android:icon="@drawable/icon">
         <activity android:configChanges="orientation|uiMode|screenLayout|screenSize|smallestScreenSize|layoutDirection|locale|fontScale|keyboard|keyboardHidden|navigation|mcc|mnc|density" android:name="org.qtproject.qt5.android.bindings.QtActivity" android:label="Multimeter" android:screenOrientation="unspecified" android:launchMode="singleTop">
             <intent-filter>

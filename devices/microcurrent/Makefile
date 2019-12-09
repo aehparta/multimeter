@@ -1,12 +1,10 @@
 
-# check that LIBE_PATH is set
-ifeq ($(LIBE_PATH),)
-    $(error LIBE_PATH not set)
-endif
+TARGET= ESP32
+USE += WIFI I2C LOG GPIO
+DEFINES = I2C_FREQUENCY=400000 I2C_SCL=23 I2C_SDA=18
+# DEFINES_ESP32 += I2C_BITBANG I2C_BITBANG_SCL=23 I2C_BITBANG_SDA=18 I2C_BITBANG_DYNAMIC
 
-libe_USE += WIFI I2C LOG
-
-# init
+# init build system
 include $(LIBE_PATH)/init.mk
 
 # our own sources etc
