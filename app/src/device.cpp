@@ -142,7 +142,7 @@ QList<QObject *> Device::channels()
 
 void Device::recv(const QString &data)
 {
-	qDebug() << data;
+	// qDebug() << data;
 
 	/* check if this is a device property line */
 	if (data.section(':', 0, 0) == "device") {
@@ -188,7 +188,7 @@ void Device::recv(const QString &data)
 
 	/* check if this is a configuration line */
 	if (data.at(1) == ':') {
-		qDebug() << data;
+		// qDebug() << data;
 		/* extract value */
 		QString value = data.section(':', 2);
 		/* extract full key description */
@@ -204,7 +204,7 @@ void Device::recv(const QString &data)
 		key = options.takeFirst();
 		/* TODO: handle options */
 
-		qDebug() << key;
+		// qDebug() << key;
 
 		/* create new channel into list if it does not yet exist */
 		Channel *channel = m_channels.contains(channel_id) ? (Channel *)m_channels[channel_id] : NULL;

@@ -1,41 +1,32 @@
 
 import QtQuick 2.11
 import QtQuick.Layouts 1.11
+import QtQuick.Controls.Material 2.12
 
-Rectangle {
-	height: mainValue.height + subValues.height
-	color: '#9090e0'
-	border.width: 1
-	border.color: '#606090'
-	visible: {
-		switch (modelData.type) {
-		case 'switch':
-			return false;
-		case 'group':
-			return false;
-		}
-		return true;
-	}
+ColumnLayout {
+	visible: childItems.mainType != 'group' && childItems.mainType != 'switch'
+	Layout.rightMargin: 20
 
-	ColumnLayout {
-		anchors.fill: parent
+	// Rectangle {
+	// 	anchors.top: parent.top
+	// 	width: parent.width
+	// 	height: 1
+	// 	color: Material.primary
+	// }
 
-		GridLayout {
-			id: subValues
-			columns: 2
-			Layout.fillWidth: true
-			Repeater {
-				model: modelData.children
-				delegate: ChannelValue {
-					Layout.fillWidth: true
-					main: false
-				}
+	/* subvalues */
+	GridLayout {
+		columns: 2
+		Repeater {
+			model: modelData.children
+			delegate: ChannelValue {
+				main: false
 			}
 		}
+	}
 
-		ChannelValue {
-			id: mainValue
-			Layout.fillWidth: true
-		}
+	/* main value */
+	ChannelValue {
+		Layout.fillWidth: true
 	}
 }

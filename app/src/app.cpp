@@ -1,6 +1,8 @@
 #include <QApplication>
+#include <QGuiApplication>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
+#include <QQuickStyle>
 #include <QFontDatabase>
 #include <QCommandLineParser>
 
@@ -41,7 +43,7 @@ int main(int argc, char *argv[])
 	QCoreApplication::setOrganizationDomain("tldr.fi");
 	QCoreApplication::setApplicationName("Multimeter");
 	QCoreApplication::setApplicationVersion("2.0.0");
-	//QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+	QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 
 	/* command line options */
 	QCommandLineParser parser;
@@ -63,6 +65,10 @@ int main(int argc, char *argv[])
 	font.setStyleHint(QFont::SansSerif);
 	app.setFont(font);
 	QFontDatabase::addApplicationFont(":/fonts/fa-solid-900.ttf");
+
+	/* set style */
+	// QQuickStyle::setStyle("Material");
+	// qDebug() << QQuickStyle::availableStyles();
 
 	/* export scanner to qml */
 	Scan scan;

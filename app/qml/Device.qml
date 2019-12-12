@@ -6,7 +6,6 @@ import QtQuick.Layouts 1.11
 Rectangle {
 	implicitWidth: window.width
 	implicitHeight: deviceView.implicitHeight
-	color: '#6060a0'
 
 	property bool childrenVisible: false
 
@@ -23,7 +22,6 @@ Rectangle {
 				background: Rectangle {
 					implicitWidth: deviceHeader.height
 					implicitHeight: deviceHeader.height
-					color: '#505090'
 				}
 			}
 
@@ -32,30 +30,23 @@ Rectangle {
 				Label {
 					Layout.fillWidth: true
 					text: modelData.name
-					color: '#000000'
 					font: Qt.font({ pixelSize: 36, weight: 50 })
 				}
 				Label {
 					Layout.fillWidth: true
 					text: modelData.address() + (modelData.port() < 0 ? '' : ':' + modelData.port())
-					color: '#303060'
 					font: Qt.font({ pixelSize: 24, weight: 50 })
 				}
 			}
 
 			/* extra options */
-			Rectangle {
-				implicitWidth: deviceHeader.height
-				implicitHeight: deviceHeader.height
-				color: '#505090'
-				Label {
+			Row {
+				height: parent.height
+				ToolButton {
+					width: height
 					text: childrenVisible ? '\uf078' : '\uf054'
 					font: Qt.font({ pixelSize: 64, weight: 80, family: 'Font Awesome 5 Free' })
-					Layout.alignment: Qt.AlignRight
-					MouseArea {
-						anchors.fill: parent
-						onClicked: childrenVisible = !childrenVisible
-					}
+					onClicked: childrenVisible = !childrenVisible
 				}
 			}
 		}

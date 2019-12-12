@@ -2,46 +2,51 @@
 import QtQuick 2.11
 import QtQuick.Layouts 1.11
 import QtGraphicalEffects 1.0
+import QtQuick.Controls.Material 2.12
+import QtQuick.Controls 2.12
 
-Rectangle {
-    width: window.width / parseInt(window.width < 500 ? 1 : window.width / 500) - channelsView.spacing
-    height: contentItem.height + 10
-	color: 'transparent'
+Item {
 	visible: modelData.enabled
+	width: parent.width / parseInt(parent.width < 500 ? 1 : parent.width / 500)
+	height: content.height + 20
 
 	/* background (borders) */
 	RectangularGlow {
-		anchors.fill: contentItem
-		glowRadius: 7
+		anchors.fill: content
+		glowRadius: 4
 		spread: 0.05
-		color: '#303070'
+		color: '#a0a0a0'
 		cornerRadius: 0
 	}
 
 	/* content */
-	Column {
-		id: contentItem
-		width: parent.width - 10
-		anchors.centerIn: parent
+	Page {
+		id: content
 		clip: true
-		spacing: 0
+		anchors.left: parent.left
+		anchors.right: parent.right
+		anchors.top: parent.top
+		anchors.margins: 5
 
 		/* header */
-		ChannelHeader {
-			width: parent.width
-		}
+		header: ChannelHeader {}
 
-		ChannelItem {
-			width: parent.width
-		}
+		/* content */
+		ColumnLayout {
+			id: contentItem
+			anchors.fill: parent
 
-		Repeater {
-			id: childItems
-			property string mainType: modelData.type
-			model: modelData.children
-			delegate: ChannelItem {
-				visible: childItems.mainType == 'group' || childItems.mainType == 'switch'
-				width: parent.width
+			ChannelItem {
+				Layout.fillWidth: true
+			}
+
+			Repeater {
+				id: childItems
+				property string mainType: modelData.type
+				model: modelData.children
+				delegate: ChannelItem {
+					visible: childItems.mainType == 'group' || childItems.mainType == 'switch'
+				}
 			}
 		}
 	}

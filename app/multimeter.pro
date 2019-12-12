@@ -1,7 +1,7 @@
 
 TEMPLATE = app
 
-QT += core qml quick widgets bluetooth
+QT += core qml quick widgets bluetooth quickcontrols2
 
 linux:!android {
 }

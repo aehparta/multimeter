@@ -1,4 +1,4 @@
-
+import QtQuick.Controls.Material 2.12
 import QtQuick 2.11
 import QtQuick.Controls 1.4
 import QtQuick.Controls 2.4
@@ -12,109 +12,67 @@ ApplicationWindow {
 	visible: true
 	width: 640
 	height: 480
-	color: '#171743'
+	// flags: Qt.FramelessWindowHint
+	
+	header: ToolBar {
+		RowLayout {
+			anchors.fill: parent
+
+			Label {
+				id: navLabel
+				clip: true
+				horizontalAlignment: Qt.AlignHCenter
+				verticalAlignment: Qt.AlignVCenter
+				Layout.fillWidth: true
+				Layout.leftMargin: 20
+				Layout.rightMargin: 20
+
+				text: 'Channels'
+				font: Qt.font({ pixelSize: 36, weight: 80 })
+			}
+
+			ToolButton {
+				text: '\uf233'
+				font: Qt.font({ pixelSize: 36, weight: 80, family: 'Font Awesome 5 Free' })
+				onClicked: navLabel.text = 'Channels'
+			}
+
+			ToolButton {
+				text: '\uf2db'
+				font: Qt.font({ pixelSize: 36, weight: 80, family: 'Font Awesome 5 Free' })
+				onClicked: navLabel.text = 'Devices'
+			}
+
+			ToolButton {
+				id: navScanButton
+				text: '\uf2f1'
+				font: Qt.font({ pixelSize: 36, weight: 80, family: 'Font Awesome 5 Free' })
+				onClicked: {
+					if (!scan.active) {
+						scan.autostart = true;
+						scan.start();
+					}
+				}
+				RotationAnimator {
+					target: navScanButton.contentItem
+					from: 0;
+					to: 360;
+					duration: 1000
+					running: scan.active
+					loops: Animation.Infinite
+				}
+			}
+
+			ToolButton {
+				text: '\uf065'
+				font: Qt.font({ pixelSize: 36, weight: 80, family: 'Font Awesome 5 Free' })
+				onClicked: window.visibility = window.visibility == Window.FullScreen ? Window.AutomaticVisibility : Window.FullScreen
+			}
+		}
+	}
 
 	ColumnLayout {
 		anchors.fill: parent
-
-		Rectangle {
-			height: navLabel.height
-			Layout.fillWidth: true
-			color: '#6060a0'
-
-			RowLayout {
-				anchors.fill: parent
-
-				Label {
-					id: navLabel
-					clip: true
-					Layout.fillWidth: true
-					Layout.leftMargin: 20
-					Layout.rightMargin: 20
-
-					text: scan.devices.length > 0 ? 'Channels' : 'Devices'
-					color: '#202040'
-					font: Qt.font({ pixelSize: 36, weight: 80 })
-				}
-
-				Label {
-					id: navChannelsButton
-					Layout.rightMargin: 20
-
-					text: '\uf233'
-					color: '#000000'
-					font: Qt.font({ pixelSize: 36, weight: 80, family: 'Font Awesome 5 Free' })
-
-					MouseArea {
-						anchors.fill: parent
-						onClicked: {
-							navLabel.text = 'Channels'
-						}
-					}
-				}
-
-				Label {
-					id: navDevicesButton
-					Layout.rightMargin: 20
-
-					text: '\uf2db'
-					color: '#000000'
-					font: Qt.font({ pixelSize: 36, weight: 80, family: 'Font Awesome 5 Free' })
-
-					MouseArea {
-						anchors.fill: parent
-						onClicked: {
-							navLabel.text = 'Devices'
-						}
-					}
-				}
-
-				Label {
-					id: navScanButton
-					Layout.rightMargin: 20
-
-					text: '\uf2f1'
-					color: scan.active ? '#202050' : '#000000'
-					font: Qt.font({ pixelSize: 36, weight: 80, family: 'Font Awesome 5 Free' })
-
-					MouseArea {
-						anchors.fill: parent
-						onClicked: {
-							if (!scan.active) {
-								scan.autostart = true;
-								scan.start();
-							}
-						}
-					}
-
-					RotationAnimator {
-						target: navScanButton
-						from: 0;
-						to: 360;
-						duration: 1000
-						running: scan.active
-						loops: Animation.Infinite
-					}
-				}
-
-				Label {
-					id: navFullscreenButton
-					Layout.rightMargin: 20
-
-					text: '\uf065'
-					color: '#000000'
-					font: Qt.font({ pixelSize: 36, weight: 80, family: 'Font Awesome 5 Free' })
-
-					MouseArea {
-						anchors.fill: parent
-						onClicked: {
-							window.visibility = window.visibility == Window.FullScreen ? Window.AutomaticVisibility : Window.FullScreen;
-						}
-					}
-				}
-
-			}
-		}
 
 		/* divider */
 		Item {
