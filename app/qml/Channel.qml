@@ -7,7 +7,7 @@ import QtQuick.Controls 2.12
 
 Item {
 	visible: modelData.enabled
-	width: parent.width / parseInt(parent.width < 500 ? 1 : parent.width / 500)
+	width: parent.width / parseInt(parent.width < 768 ? 1 : parent.width / 768)
 	height: content.height + 20
 
 	/* background (borders) */

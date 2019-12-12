@@ -31,7 +31,8 @@ var plain_types = [
 	'group',
 	'date',
 	'time',
-	'datetime'
+	'datetime',
+	'plain'
 ];
 
 function divider(data) {
@@ -47,8 +48,9 @@ function divider(data) {
 		return 1;
 	}
 	/* calculate divider */
+	var v = Math.abs(data.value);
 	for (var m in unit_prefixes) {
-		if (m <= data.value && (data.value < (m * 1000) || m >= 1e18)) {
+		if (m <= v && (v < (m * 1000) || m >= 1e18)) {
 			return m;
 		}
 	};

@@ -67,7 +67,7 @@ int main(int argc, char *argv[])
 	QFontDatabase::addApplicationFont(":/fonts/fa-solid-900.ttf");
 
 	/* set style */
-	// QQuickStyle::setStyle("Material");
+	QQuickStyle::setStyle("Material");
 	// qDebug() << QQuickStyle::availableStyles();
 
 	/* export scanner to qml */
