@@ -47,9 +47,19 @@ function divider(data) {
 	if (['humidity', 'temperature', 'celsius', 'fahrenheit'].includes(data.type)) {
 		return 1;
 	}
+	/* if resolution is not set, we cannot really calculate proper divider, just use 1 */
+	if (data.resolution == 0) {
+		return 1;
+	}
 	/* calculate divider */
 	var v = Math.abs(data.value);
 	for (var m in unit_prefixes) {
+		/* check that it is not smaller than resolution */
+		console.log(data.resolution, m, data.value);
+		if (data.resolution >= m) {
+			return m;
+		}
+		/* check if this is correct divider */
 		if (m <= v && (v < (m * 1000) || m >= 1e18)) {
 			return m;
 		}
@@ -98,7 +108,7 @@ function human(data) {
 			value = value.replace(/[0]+$/gm, '');
 			value = '0' <= value[0] && value[0] <= '9' ? value : '0' + value;
 		}
-	} else {
+	} else if (data.resolution <= m) {
 		/* resolution is set, render by resolution
 		 * first find decimals in resolution combined with divider
 		 */
@@ -108,7 +118,12 @@ function human(data) {
 		value = parseInt(value / r) * r;
 		/* cut decimals just to be sure since float value math operations sometimes are not as precise as we want */
 		value = value.toFixed(decimals);
+	} else {
+		/* divider was smaller than resolution, return 0 */
+		value = '0';
 	}
+
+	console.log(value, m);
 
 	return value;
 }
