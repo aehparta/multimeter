@@ -14,9 +14,17 @@ ApplicationWindow {
 	height: 480
 	// flags: Qt.FramelessWindowHint
 	
+	property string page: 'channels'
+
 	header: ToolBar {
 		RowLayout {
 			anchors.fill: parent
+
+			ToolButton {
+				text: '\uf142'
+				font: Qt.font({ pixelSize: 36, weight: 80, family: 'Font Awesome 5 Free' })
+				onClicked: leftPanel.open()
+			}
 
 			Label {
 				id: navLabel
@@ -32,29 +40,19 @@ ApplicationWindow {
 			}
 
 			ToolButton {
-				text: '\uf233'
+				text: '\uf2ed'
 				font: Qt.font({ pixelSize: 36, weight: 80, family: 'Font Awesome 5 Free' })
-				onClicked: navLabel.text = 'Channels'
+				visible: scan.selected > 0 && window.page == 'devices'
+				onClicked: scan.selectedRemove()
 			}
 
 			ToolButton {
-				text: '\uf2db'
-				font: Qt.font({ pixelSize: 36, weight: 80, family: 'Font Awesome 5 Free' })
-				onClicked: navLabel.text = 'Devices'
-			}
-
-			ToolButton {
-				id: navScanButton
+				id: scanActive
 				text: '\uf2f1'
 				font: Qt.font({ pixelSize: 36, weight: 80, family: 'Font Awesome 5 Free' })
-				onClicked: {
-					if (!scan.active) {
-						scan.autostart = true;
-						scan.start();
-					}
-				}
+				visible: scan.active
 				RotationAnimator {
-					target: navScanButton.contentItem
+					target: scanActive.contentItem
 					from: 0;
 					to: 360;
 					duration: 1000
@@ -62,56 +60,26 @@ ApplicationWindow {
 					loops: Animation.Infinite
 				}
 			}
-
-			ToolButton {
-				text: '\uf065'
-				font: Qt.font({ pixelSize: 36, weight: 80, family: 'Font Awesome 5 Free' })
-				onClicked: window.visibility = window.visibility == Window.FullScreen ? Window.AutomaticVisibility : Window.FullScreen
-			}
 		}
 	}
 
-	ColumnLayout {
+	Channels {
+		id: channelsView
 		anchors.fill: parent
+		visible: window.page == 'channels'
+	}
 
-		/* divider */
-		Item {
-			Layout.fillWidth: true
-			height: 0
-		}
+	Devices {
+		id: devicesView
+		anchors.fill: parent
+		visible: window.page == 'devices'
+	}
 
-		ScrollView {
-			clip: true
-			Layout.fillWidth: true
-			Layout.fillHeight: true
-			ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
-			ScrollBar.vertical.policy: ScrollBar.AlwaysOff
-			wheelEnabled: true
-			contentWidth: window.width
-			contentHeight: {
-				switch (navLabel.text) {
-				case 'Channels':
-					return channelsView.height;
-				case 'Devices':
-					return devicesView.height
-				}
-				return 0;
-			}
-
-			/* channels view */
-			Channels {
-				id: channelsView
-				width: parent.width
-				visible: navLabel.text == 'Channels'
-			}
-
-			/* devices view */
-			Devices {
-				id: devicesView
-				width: parent.width
-				visible: navLabel.text == 'Devices'
-			}
-		}
+	/* left slide panel */
+	LeftPanel {
+		id: leftPanel
+		// width: window.width * 0.7
+		height: window.height
 	}
 
 	/* fullscreen off when escape is pressed */

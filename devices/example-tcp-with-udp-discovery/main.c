@@ -109,7 +109,6 @@ int wifi_init(void);
 		"N:mode:source\n" \
 		"N:method:push\n" \
 		"N:base:10\n" \
-		"N:divider:1\n" \
 		"O:name:Datetime\n" \
 		"O:type:datetime\n" \
 		"O:mode:source\n" \

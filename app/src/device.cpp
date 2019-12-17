@@ -9,6 +9,7 @@ Device::Device(QObject *parent, bool enabled, QString address, int port, QString
 
 	m_name = name.isEmpty() ? id() : name;
 	m_enabled = enabled;
+	m_selected = false;
 
 	m_socket_tcp = NULL;
 	m_socket_bt = NULL;
@@ -27,6 +28,7 @@ Device::Device(QObject *parent, QString settings_group) : QObject(parent)
 	m_address = settings.value("address").toString();
 	m_port = settings.value("port").toInt();
 	m_enabled = settings.value("enabled").toBool();
+	m_selected = false;
 
 	settings.endGroup();
 	settings.endGroup();
@@ -40,7 +42,7 @@ Device::Device(QObject *parent, QString settings_group) : QObject(parent)
 	qDebug() << "new device from config" << id() << m_channels.size();
 }
 
-Device::~Device()
+void Device::save()
 {
 	if (m_address.isEmpty()) {
 		qDebug() << "invalid device?" << m_address << m_port;
@@ -59,6 +61,14 @@ Device::~Device()
 
 	settings.endGroup();
 	settings.endGroup();
+}
+
+void Device::remove()
+{
+	stop();
+	QSettings settings;
+	settings.beginGroup("devices");
+	settings.remove(id());
 }
 
 QString Device::name()
@@ -80,6 +90,19 @@ QString Device::address()
 int Device::port()
 {
 	return m_port;
+}
+
+bool Device::getSelected()
+{
+	return m_selected;
+}
+
+void Device::setSelected(bool value)
+{
+	if (m_selected != value) {
+		m_selected = value;
+		emit selectedChanged();
+	}
 }
 
 void Device::start()

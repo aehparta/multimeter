@@ -15,6 +15,7 @@ class Scan : public QObject
 	Q_PROPERTY(bool udpEnabled MEMBER m_scanner_udp_enabled WRITE udpEnable NOTIFY udpEnabledChanged)
 	Q_PROPERTY(bool active READ isActive NOTIFY activeChanged)
 	Q_PROPERTY(bool autostart MEMBER m_autostart NOTIFY autostartChanged)
+	Q_PROPERTY(int selected MEMBER m_selected NOTIFY selectedChanged)
 	Q_PROPERTY(QList<QObject *> channels READ channels NOTIFY channelsChanged)
 	Q_PROPERTY(QList<QObject *> devices READ devices NOTIFY devicesChanged)
 
@@ -32,6 +33,8 @@ public:
 	QList<QObject *> channels();
 	QList<QObject *> devices();
 
+	Q_INVOKABLE void selectedRemove();
+	
 signals:
 	void btEnabledChanged();
 	void udpEnabledChanged();
@@ -43,6 +46,7 @@ signals:
 	void autostartChanged();
 	void channelsChanged();
 	void devicesChanged();
+	void selectedChanged();
 
 private slots:
 	void btDiscovered(const QBluetoothDeviceInfo &);
@@ -50,6 +54,7 @@ private slots:
 	void udpFinished();
 	void udpHasData();
 	void deviceChannelsChanged();
+	void deviceSelectedChanged();
 
 protected:
 
@@ -63,6 +68,8 @@ private:
 	QTimer m_scanner_udp_timer;
 	/* autostart discovered devices */
 	bool m_autostart;
+	/* count of selected devices */
+	int m_selected;
 	/* list of devices found */
 	QList<QObject *> m_devices;
 

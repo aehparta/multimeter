@@ -8,6 +8,7 @@
         <file>qml/ChannelValue.qml</file>
         <file>qml/Device.qml</file>
         <file>qml/Devices.qml</file>
+        <file>qml/LeftPanel.qml</file>
 
         <file>js/value.js</file>
 

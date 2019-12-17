@@ -2,6 +2,7 @@
 import QtQuick 2.11
 import QtQuick.Controls 2.4
 import QtQuick.Layouts 1.11
+import QtQuick.Controls.Material 2.12
 
 Rectangle {
 	implicitWidth: window.width
@@ -25,21 +26,28 @@ Rectangle {
 				}
 			}
 
-			ColumnLayout {
-				clip: true
-				Label {
-					Layout.fillWidth: true
-					text: modelData.name
-					font: Qt.font({ pixelSize: 36, weight: 50 })
-				}
-				Label {
-					Layout.fillWidth: true
-					text: modelData.address() + (modelData.port() < 0 ? '' : ':' + modelData.port())
-					font: Qt.font({ pixelSize: 24, weight: 50 })
+			MouseArea {
+				width: childrenRect.width
+				height: childrenRect.height
+				Layout.fillWidth: true
+
+				onClicked: modelData.selected = !modelData.selected;
+
+				Column {
+					id: label
+					clip: true
+					Label {
+						text: modelData.name
+						font: Qt.font({ pixelSize: 36, weight: 50 })
+					}
+					Label {
+						text: modelData.address() + (modelData.port() < 0 ? '' : ':' + modelData.port())
+						font: Qt.font({ pixelSize: 24, weight: 50 })
+					}
 				}
 			}
 
-			/* extra options */
+			/* actions */
 			Row {
 				height: parent.height
 				ToolButton {
@@ -70,5 +78,12 @@ Rectangle {
 				}
 			}
 		}
+	}
+
+	/* selected overlay */
+	Rectangle {
+		anchors.fill: parent
+		color: modelData.selected ? Material.primary : 'transparent'
+		opacity: 0.3
 	}
 }

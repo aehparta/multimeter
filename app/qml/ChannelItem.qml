@@ -5,14 +5,9 @@ import QtQuick.Controls.Material 2.12
 
 ColumnLayout {
 	visible: childItems.mainType != 'group' && childItems.mainType != 'switch'
+	Layout.leftMargin: 20
 	Layout.rightMargin: 20
-
-	// Rectangle {
-	// 	anchors.top: parent.top
-	// 	width: parent.width
-	// 	height: 1
-	// 	color: Material.primary
-	// }
+	Layout.bottomMargin: 5
 
 	/* subvalues */
 	GridLayout {

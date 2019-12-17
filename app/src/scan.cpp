@@ -9,6 +9,7 @@ Scan::Scan(QObject *parent)
 	m_scanner_udp = NULL;
 	m_scanner_udp_enabled = true;
 	m_autostart = true;
+	m_selected = 0;
 
 	m_scanner_udp_timer.setInterval(5000);
 	m_scanner_udp_timer.setSingleShot(true);
@@ -26,6 +27,10 @@ Scan::Scan(QObject *parent)
 
 Scan::~Scan()
 {
+	foreach (QObject *o, m_devices) {
+		Device *device = (Device *)o;
+		device->save();
+	}
 }
 
 void Scan::btEnable(bool value)
@@ -108,6 +113,19 @@ QList<QObject *> Scan::devices()
 	return m_devices;
 }
 
+void Scan::selectedRemove()
+{
+	foreach (QObject *o, m_devices) {
+		Device *device = (Device *)o;
+		if (device->getSelected()) {
+			m_devices.removeOne(o);
+			device->remove();
+			delete device;
+		}
+	}
+	emit devicesChanged();
+}
+
 void Scan::btDiscovered(const QBluetoothDeviceInfo &dev)
 {
 	addDevice(dev.address().toString(), -1, dev.name());
@@ -167,6 +185,13 @@ void Scan::deviceChannelsChanged()
 	}
 }
 
+void Scan::deviceSelectedChanged()
+{
+	Device *device = (Device *)sender();
+	m_selected += device->getSelected() ? 1 : -1;
+	emit selectedChanged();
+}
+
 bool Scan::addDevice(const QString &address, int port, QString name)
 {
 	return addDevice(new Device(this, port < 1 ? false : true, address, port, name));
@@ -183,6 +208,8 @@ bool Scan::addDevice(Device *device)
 	}
 	/* connect to device channels changed signal */
 	connect(device, SIGNAL(channelsChanged()), this, SLOT(deviceChannelsChanged()));
+	/* select signal */
+	connect(device, SIGNAL(selectedChanged()), this, SLOT(deviceSelectedChanged()));
 	/* append to list of devices */
 	m_devices.append(device);
 	if (m_autostart) {

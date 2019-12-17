@@ -12,19 +12,40 @@ var units = {
 	fahrenheit: '°F',
 };
 
-var unit_prefixes = {
-	1e-12: 'n',
-	1e-9: 'p',
-	1e-6: 'μ',
-	1e-3: 'm',
-	1: '',
-	1e3: 'k',
-	1e6: 'M',
-	1e9: 'G',
-	1e12: 'T',
-	1e15: 'P',
-	1e18: 'E'
-};
+var unit_prefixes = [{
+	'd': 1e18,
+	'u': 'E'
+}, {
+	'd': 1e15,
+	'u': 'P'
+}, {
+	'd': 1e12,
+	'u': 'T'
+}, {
+	'd': 1e9,
+	'u': 'G'
+}, {
+	'd': 1e6,
+	'u': 'M'
+}, {
+	'd': 1e3,
+	'u': 'k'
+}, {
+	'd': 1,
+	'u': ''
+}, {
+	'd': 1e-3,
+	'u': 'm'
+}, {
+	'd': 1e-6,
+	'u': 'μ'
+}, {
+	'd': 1e-9,
+	'u': 'p'
+}, {
+	'd': 1e-12,
+	'u': 'n'
+}];
 
 /* types that use their value plain and are not example number */
 var plain_types = [
@@ -38,33 +59,41 @@ var plain_types = [
 function divider(data) {
 	/* if constant divider is specified by device configuration */
 	if (data.divider != 0 && unit_prefixes[data.divider] !== undefined) {
-		return data.divider;
+		return {
+			'd': data.divider,
+			'u': ''
+		}
 	}
 	/* if device type is not something we want to use the divider on */
 	if (units[data.type] === undefined) {
-		return 1;
+		return {
+			'd': 1,
+			'u': ''
+		};
 	}
 	if (['humidity', 'temperature', 'celsius', 'fahrenheit'].includes(data.type)) {
-		return 1;
-	}
-	/* if resolution is not set, we cannot really calculate proper divider, just use 1 */
-	if (data.resolution == 0) {
-		return 1;
+		return {
+			'd': 1,
+			'u': ''
+		};
 	}
 	/* calculate divider */
 	var v = Math.abs(data.value);
-	for (var m in unit_prefixes) {
+	for (var i in unit_prefixes) {
+		var p = unit_prefixes[i];
 		/* check that it is not smaller than resolution */
-		console.log(data.resolution, m, data.value);
-		if (data.resolution >= m) {
-			return m;
+		if (data.resolution >= p.d) {
+			return p;
 		}
 		/* check if this is correct divider */
-		if (m <= v && (v < (m * 1000) || m >= 1e18)) {
-			return m;
+		if (p.d <= v && (v < (p.d * 1000) || p.d >= 1e18)) {
+			return p;
 		}
 	};
-	return 1;
+	return {
+		'd': 1,
+		'u': ''
+	};
 }
 
 function unit(data) {
@@ -73,8 +102,8 @@ function unit(data) {
 		return false;
 	}
 	/* resolve unit and prefix */
-	var m = divider(data);
-	return unit_prefixes[m] + units[data.type];
+	var p = divider(data);
+	return p.u + units[data.type];
 }
 
 function human(data) {
@@ -86,11 +115,11 @@ function human(data) {
 	if (!isFinite(data.value) || data.value.length < 1) {
 		return NaN;
 	}
-	/* get unit prefix divider */
-	var m = divider(data);
-	/* calculate value using unit prefix divider */
-	var value = data.value / m;
 
+	/* get unit prefix divider */
+	var p = divider(data);
+	/* calculate value using unit prefix divider */
+	var value = data.value / p.d;
 	/* if resolution is not set, convert to max of 6 characters */
 	if (data.resolution == 0) {
 		/* 4 decimals max with '0.' in front */
@@ -105,34 +134,25 @@ function human(data) {
 		} while (value.length > 6 && i >= 0);
 		/* trim trailing zeroes off if value has decimals */
 		if (value.includes('.')) {
-			value = value.replace(/[0]+$/gm, '');
+			value = value.replace(/\.[0]+$/gm, '');
 			value = '0' <= value[0] && value[0] <= '9' ? value : '0' + value;
 		}
-	} else if (data.resolution <= m) {
+	} else {
 		/* resolution is set, render by resolution
 		 * first find decimals in resolution combined with divider
 		 */
-		var r = Number(data.resolution) / m;
+		var r = Number(data.resolution) / p.d;
 		var decimals = Math.floor(r) === r ? 0 : (r.toString().split('.')[1].length || 0);
 		/* round up to resolution */
 		value = parseInt(value / r) * r;
 		/* cut decimals just to be sure since float value math operations sometimes are not as precise as we want */
 		value = value.toFixed(decimals);
-	} else {
-		/* divider was smaller than resolution, return 0 */
-		value = '0';
 	}
 
-	console.log(value, m);
+	if (data.type == 'wattage') {
+		console.log(data.value, value, data.resolution, p.d);
+	}
+
 
 	return value;
 }
-
-/* round up to resolution */
-// number = double(int(number / m_resolution)) * m_resolution;
-/* cut decimals of the end manually, float value round ups can sometimes add small decimals */
-// int decimals = 0;
-// QString r = QString("%1").arg((m_resolution - double((int(m_resolution)))));
-// if (r.mid(1, 1) == ".") {
-// 	decimals = r.size() - 2;
-// }

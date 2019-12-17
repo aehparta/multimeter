@@ -14,17 +14,22 @@ class Device : public QObject
 	Q_OBJECT
 	Q_PROPERTY(QString name MEMBER m_name NOTIFY nameChanged)
 	Q_PROPERTY(bool enabled MEMBER m_enabled NOTIFY enabledChanged)
+	Q_PROPERTY(bool selected READ getSelected WRITE setSelected NOTIFY selectedChanged)
 	Q_PROPERTY(QList<QObject *> channels READ channels NOTIFY channelsChanged)
 
 public:
 	Device(QObject *parent, bool enabled, QString address, int port = -1, QString name = "");
 	Device(QObject *parent, QString settings_group);
-	~Device();
+
+	void save();
+	void remove();
 
 	QString name();
 	Q_INVOKABLE QString id();
 	Q_INVOKABLE QString address();
 	Q_INVOKABLE int port();
+	bool getSelected();
+	void setSelected(bool value);
 
 	Q_INVOKABLE void start();
 	Q_INVOKABLE void stop();
@@ -35,6 +40,7 @@ public:
 signals:
 	void nameChanged();
 	void enabledChanged();
+	void selectedChanged();
 
 	void connected();
 	void disconnected();
@@ -55,6 +61,8 @@ private:
 	QString m_name;
 	/* device enabled */
 	bool m_enabled;
+	/* device selected (in ui) */
+	bool m_selected;
 
 	/* tcp network socket */
 	QTcpSocket *m_socket_tcp;
