@@ -149,9 +149,9 @@ function human(data) {
 		value = value.toFixed(decimals);
 	}
 
-	if (data.type == 'wattage') {
-		console.log(data.value, value, data.resolution, p.d);
-	}
+	// if (data.type == 'wattage') {
+	// 	console.log(data.value, value, data.resolution, p.d);
+	// }
 
 
 	return value;

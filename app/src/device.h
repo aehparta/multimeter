@@ -15,6 +15,7 @@ class Device : public QObject
 	Q_PROPERTY(QString name MEMBER m_name NOTIFY nameChanged)
 	Q_PROPERTY(bool enabled MEMBER m_enabled NOTIFY enabledChanged)
 	Q_PROPERTY(bool selected READ getSelected WRITE setSelected NOTIFY selectedChanged)
+	Q_PROPERTY(bool connected MEMBER m_connected NOTIFY connectedChanged)
 	Q_PROPERTY(QList<QObject *> channels READ channels NOTIFY channelsChanged)
 
 public:
@@ -41,7 +42,8 @@ signals:
 	void nameChanged();
 	void enabledChanged();
 	void selectedChanged();
-
+	void connectedChanged();
+	
 	void connected();
 	void disconnected();
 	void error();
@@ -63,6 +65,8 @@ private:
 	bool m_enabled;
 	/* device selected (in ui) */
 	bool m_selected;
+	/* connected */
+	bool m_connected;
 
 	/* tcp network socket */
 	QTcpSocket *m_socket_tcp;

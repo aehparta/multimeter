@@ -29,6 +29,7 @@ Device::Device(QObject *parent, QString settings_group) : QObject(parent)
 	m_port = settings.value("port").toInt();
 	m_enabled = settings.value("enabled").toBool();
 	m_selected = false;
+	m_connected = false;
 
 	settings.endGroup();
 	settings.endGroup();
@@ -142,6 +143,8 @@ void Device::stop()
 		m_socket_bt = NULL;
 		emit disconnected();
 	}
+	m_connected = false;
+	emit connectedChanged();
 }
 
 void Device::send(const QString &data)
@@ -290,6 +293,8 @@ void Device::connectionReady()
 	qDebug() << m_address << m_port << "connection established, requesting config";
 	/* inform that we are now connected */
 	emit connected();
+	m_connected = true;
+	emit connectedChanged();
 	/* start timer to secure we receive config */
 	timer.stop();
 	disconnect(&timer, NULL, NULL, NULL);

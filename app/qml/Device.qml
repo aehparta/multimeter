@@ -33,16 +33,23 @@ Rectangle {
 
 				onClicked: modelData.selected = !modelData.selected;
 
-				Column {
-					id: label
-					clip: true
+				Row {
 					Label {
-						text: modelData.name
-						font: Qt.font({ pixelSize: 36, weight: 50 })
+						text: '\uf071'
+						font: Qt.font({ pixelSize: 64, weight: 80, family: 'Font Awesome 5 Free' })
+						visible: !modelData.connected
 					}
-					Label {
-						text: modelData.address() + (modelData.port() < 0 ? '' : ':' + modelData.port())
-						font: Qt.font({ pixelSize: 24, weight: 50 })
+					Column {
+						id: label
+						clip: true
+						Label {
+							text: modelData.name
+							font: Qt.font({ pixelSize: 36, weight: 50 })
+						}
+						Label {
+							text: modelData.address() + (modelData.port() < 0 ? '' : ':' + modelData.port())
+							font: Qt.font({ pixelSize: 24, weight: 50 })
+						}
 					}
 				}
 			}
