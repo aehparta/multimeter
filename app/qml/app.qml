@@ -35,7 +35,7 @@ ApplicationWindow {
 				Layout.leftMargin: 20
 				Layout.rightMargin: 20
 
-				text: 'Channels'
+				text: window.page
 				font: Qt.font({ pixelSize: 36, weight: 80 })
 			}
 

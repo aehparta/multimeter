@@ -128,6 +128,10 @@ void Scan::selectedRemove()
 
 void Scan::btDiscovered(const QBluetoothDeviceInfo &dev)
 {
+	//if (!dev.serviceUuids().contains(QBluetoothUuid::SerialPort)) {
+	//	return;
+	//}
+	qDebug() << "discovered" << dev.serviceClasses() << dev.serviceUuids();
 	addDevice(dev.address().toString(), -1, dev.name());
 }
 

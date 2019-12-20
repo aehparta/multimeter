@@ -73,6 +73,9 @@ static void *adcs_thread_func(void *data)
 	double avg_s = 0.0;
 	uint32_t avg_c = 0.0;
 
+	/* let power etc stabilize before first measurement */
+	os_sleepf(0.1);
+
 	while (1) {
 		v1 = mcp3221_read(&dev1, 0);
 		v2 = mcp3221_read(&dev2, 0);
